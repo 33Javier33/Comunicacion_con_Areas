@@ -10,161 +10,204 @@
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HEADER */
-        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
-        header h1 { font-size: 1rem; font-weight: 700; color: var(--primary); }
-        .user-info { font-size: 0.65rem; color: var(--gray); text-align: right; }
+        /* --- OVERLAY DE CARGA GLOBAL --- */
+        #global-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* FEED */
-        #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 250px; }
-        .card { background: white; border-radius: 18px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.04); position: relative; transition: 0.3s; }
+        /* --- LOGIN --- */
+        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 25px; transition: 0.5s; }
+        .login-card { background: white; padding: 35px 30px; border-radius: 28px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         
-        /* ESTILOS DE MENSAJES DISTINTIVOS */
-        .msg-card { border-left: 5px solid var(--gray); }
+        /* --- HEADER --- */
+        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
+        header h1 { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* --- FEED --- */
+        #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 250px; scroll-behavior: smooth; }
+        .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); position: relative; animation: cardIn 0.4s ease-out; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* --- ESTADOS DE CARGA DE TARJETAS --- */
+        .card.sending { opacity: 0.6; filter: grayscale(0.8); animation: pulseSending 1.5s infinite; }
+        @keyframes pulseSending { 0% { opacity: 0.6; } 50% { opacity: 0.4; } 100% { opacity: 0.6; } }
+        .load-tag { font-size: 0.65rem; color: var(--danger); font-weight: 700; font-style: italic; }
+
+        /* --- MENSAJES DISTINTIVOS --- */
         .msg-mine { background: #f0fdf4; border-left: 5px solid var(--accent); }
-        .author-badge { font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; color: white; display: inline-block; margin-bottom: 5px; }
+        .msg-other { background: white; border-left: 5px solid var(--gray); }
+        .author-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 8px; color: white; display: inline-block; margin-bottom: 8px; text-transform: uppercase; }
         .msg-content { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; color: var(--text); }
 
-        /* CALENDARIO */
-        .cal-nav { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px; border-radius: 12px; margin: 10px 0; font-size: 0.8rem; font-weight: 700; }
-        .cal-nav button { border: 1px solid #cbd5e1; background: white; border-radius: 50%; width: 32px; height: 32px; font-weight: 900; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border-radius: 8px; background: white; border: 1px solid #e2e8f0; font-weight: 600; }
-        .day.active { background: var(--accent) !important; color: white; border: none; }
+        /* --- CALENDARIO --- */
+        .cal-nav { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 10px; border-radius: 14px; margin: 12px 0; font-size: 0.85rem; font-weight: 700; }
+        .cal-nav button { border: 1px solid #cbd5e1; background: white; border-radius: 50%; width: 35px; height: 35px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 10px; background: white; border: 1px solid #e2e8f0; font-weight: 600; transition: 0.2s; }
+        .day.active { background: var(--accent) !important; color: white; border: none; box-shadow: 0 4px 8px rgba(16,185,129,0.3); }
 
-        /* NAVEGACIÓN INFERIOR Y NOTIFICACIÓN */
+        /* --- INTERFAZ --- */
+        .msg-input-panel { position: fixed; bottom: 70px; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 90; box-shadow: 0 -10px 20px rgba(0,0,0,0.05); }
+        textarea, input, select { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 15px; font-size: 16px; outline: none; margin-bottom: 12px; background: #f8fafc; }
+        .btn-p { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 15px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.3s; }
+        .btn-p:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-p:disabled { background: var(--gray); opacity: 0.7; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.65rem; font-weight: 700; position: relative; }
-        .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); }
-        
-        .notif-badge { position: absolute; top: 12px; right: 25%; background: var(--danger); color: white; font-size: 0.6rem; min-width: 16px; height: 16px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; font-weight: 800; border: 2px solid white; display: none; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.7rem; font-weight: 700; position: relative; }
+        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); }
+        .notif-badge { position: absolute; top: 12px; right: 28%; background: var(--danger); color: white; font-size: 0.65rem; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; font-weight: 800; border: 2px solid white; }
 
-        /* MODALES Y OTROS */
-        .msg-input-panel { position: fixed; bottom: 70px; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 90; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); }
-        textarea, input, select { width: 100%; padding: 14px; border: 1px solid #cbd5e1; border-radius: 14px; font-size: 16px; outline: none; margin-bottom: 10px; resize: none; }
-        .btn-p { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 700; cursor: pointer; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); display: none; align-items: flex-end; z-index: 2000; }
-        .modal-body { background: white; width: 100%; border-radius: 28px 28px 0 0; padding: 30px; animation: slideUp 0.3s ease-out; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); display: none; align-items: flex-end; z-index: 2000; }
+        .modal-body { background: white; width: 100%; border-radius: 30px 30px 0 0; padding: 30px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 25px; }
-        .login-card { background: white; padding: 30px; border-radius: 24px; width: 100%; max-width: 350px; text-align: center; }
     </style>
 </head>
 <body>
 
+<!-- LOADER GLOBAL -->
+<div id="global-loader">
+    <div class="spinner"></div>
+    <p id="loader-text" style="font-weight: 600; color: var(--primary); font-size: 0.9rem;">Cargando datos...</p>
+</div>
+
+<!-- LOGIN -->
 <div id="login-screen">
     <div class="login-card">
-        <h2 style="margin-bottom:20px;">Acceso Ejecutivo</h2>
-        <input type="text" id="log-nombre" placeholder="Nombre">
-        <input type="text" id="log-area" placeholder="Área">
-        <input type="password" id="log-pass" placeholder="Contraseña">
-        <button class="btn-p" onclick="intentarLogin()">ENTRAR</button>
+        <h2 style="margin-bottom:25px; font-weight: 800;">Executive Hub</h2>
+        <input type="text" id="log-nombre" placeholder="Nombre completo">
+        <input type="text" id="log-area" placeholder="Área de trabajo">
+        <input type="password" id="log-pass" placeholder="Contraseña fija">
+        <button class="btn-p" id="btn-login" onclick="intentarLogin()">ENTRAR AL PANEL</button>
     </div>
 </div>
 
 <header>
-    <h1>Executive Hub</h1>
-    <div class="user-info">
-        <b id="user-display">-</b><br><span onclick="logout()" style="color:var(--danger); font-weight:700">Cerrar Sesión</span>
+    <h1>Panel Ejecutivo</h1>
+    <div style="text-align: right;">
+        <p style="font-size: 0.7rem; font-weight: 700;"><span class="status-dot"></span> <span id="user-display">-</span></p>
+        <span onclick="logout()" style="color:var(--danger); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Cerrar Sesión</span>
     </div>
 </header>
 
 <div id="main-feed"></div>
 
+<!-- MENSAJES INPUT -->
 <div id="msg-input" class="msg-input-panel" style="display:none">
-    <textarea id="m-texto" placeholder="Escribe un mensaje..."></textarea>
+    <textarea id="m-texto" placeholder="Escribe un mensaje... (Presiona Enter para párrafos)"></textarea>
     <button class="btn-p" id="btn-send-msg" onclick="sendMsg()">ENVIAR MENSAJE</button>
 </div>
 
-<button id="fab" style="position:fixed; bottom:90px; right:20px; background:var(--primary); color:white; width:64px; height:64px; border-radius:32px; border:none; font-size:32px; box-shadow:0 8px 20px rgba(0,0,0,0.25); z-index:100;" onclick="showModal('modal-socio', true)">+</button>
+<button id="fab" style="position:fixed; bottom:90px; right:20px; background:var(--primary); color:white; width:65px; height:65px; border-radius:35px; border:none; font-size:35px; box-shadow:0 10px 20px rgba(0,0,0,0.3); z-index:100; display: flex; align-items: center; justify-content: center;" onclick="showModal('modal-socio', true)">+</button>
 
 <nav class="bottom-nav">
-    <button class="nav-item active" id="tab-socios" onclick="switchTab('socios')">
-        SOCIOS
-    </button>
+    <button class="nav-item active" id="tab-socios" onclick="switchTab('socios')">SOCIOS</button>
     <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">
-        MENSAJES
+        CANAL
         <div id="msg-notif" class="notif-badge">0</div>
     </button>
 </nav>
 
-<!-- MODALES -->
+<!-- MODAL SOCIO -->
 <div id="modal-socio" class="modal" onclick="if(event.target==this) showModal('modal-socio', false)">
     <div class="modal-body">
-        <h2 style="margin-bottom:20px">Nuevo Registro</h2>
+        <h2 style="margin-bottom:20px; font-weight: 800;">Nuevo Registro</h2>
         <input type="text" id="s-nom" placeholder="Nombre">
         <input type="text" id="s-ape" placeholder="Apellido">
         <input type="text" id="s-area" placeholder="Área">
+        <label style="font-size:0.7rem; font-weight:800; color:var(--gray); margin-left: 5px;">FECHA DE INGRESO</label>
         <input type="date" id="s-fec">
-        <select id="s-con"><option value="Planta">Planta</option><option value="Part-time">Part-time</option></select>
-        <button class="btn-p" onclick="addSocio()">REGISTRAR</button>
+        <select id="s-con"><option value="Planta">Contrato: Planta</option><option value="Part-time">Contrato: Part-time</option></select>
+        <button class="btn-p" onclick="addSocio()">GUARDAR SOCIO</button>
     </div>
 </div>
 
+<!-- MODAL EDITAR -->
 <div id="modal-edit" class="modal" onclick="if(event.target==this) showModal('modal-edit', false)">
     <div class="modal-body">
-        <h2 style="margin-bottom:20px">Editar Mensaje</h2>
-        <textarea id="edit-msg-text" style="height: 150px;"></textarea>
+        <h2 style="margin-bottom:20px; font-weight: 800;">Editar Mensaje</h2>
+        <textarea id="edit-msg-text" style="height: 180px;"></textarea>
         <input type="hidden" id="edit-msg-id">
         <button class="btn-p" id="btn-save-edit" onclick="saveEditMsg()">GUARDAR CAMBIOS</button>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; 
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; // <--- PEGA TU URL AQUÍ
     const CLAVE_FIJA = '1234'; 
 
     let user = null, currentTab = 'socios', socios = [], mensajes = [], viewStates = {};
     let lastSeenMsgId = localStorage.getItem('lastSeenMsgId') || 0;
 
     window.onload = () => {
-        const saved = localStorage.getItem('hub_user_v13');
-        if(saved) { user = JSON.parse(saved); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); }
-    };
-
-    function intentarLogin() {
-        const n = document.getElementById('log-nombre').value, a = document.getElementById('log-area').value, p = document.getElementById('log-pass').value;
-        if(p === CLAVE_FIJA && n && a) {
-            user = { nombre: n, area: a };
-            localStorage.setItem('hub_user_v13', JSON.stringify(user));
+        const saved = localStorage.getItem('hub_user_v14');
+        if(saved) {
+            user = JSON.parse(saved);
             document.getElementById('login-screen').style.display = 'none';
             iniciarApp();
-        } else { alert("Datos incorrectos"); }
+        }
+    };
+
+    function showGlobalLoader(show, text = "Cargando...") {
+        const loader = document.getElementById('global-loader');
+        document.getElementById('loader-text').innerText = text;
+        loader.style.display = show ? 'flex' : 'none';
     }
 
-    function iniciarApp() { 
-        document.getElementById('user-display').innerText = user.nombre; 
-        fetchData(); 
-        setInterval(fetchData, 45000); 
+    function intentarLogin() {
+        const n = document.getElementById('log-nombre').value;
+        const a = document.getElementById('log-area').value;
+        const p = document.getElementById('log-pass').value;
+        const btn = document.getElementById('btn-login');
+
+        if(!n || !a || !p) return alert("Completa todos los campos");
+
+        btn.disabled = true;
+        btn.innerText = "VERIFICANDO...";
+
+        setTimeout(() => {
+            if(p === CLAVE_FIJA) {
+                user = { nombre: n, area: a };
+                localStorage.setItem('hub_user_v14', JSON.stringify(user));
+                document.getElementById('login-screen').style.display = 'none';
+                iniciarApp();
+            } else {
+                alert("Contraseña incorrecta");
+                btn.disabled = false;
+                btn.innerText = "ENTRAR AL PANEL";
+            }
+        }, 800);
     }
 
-    function logout() { localStorage.removeItem('hub_user_v13'); location.reload(); }
+    function iniciarApp() {
+        document.getElementById('user-display').innerText = user.nombre;
+        showGlobalLoader(true, "Sincronizando con Google Sheets...");
+        fetchData().then(() => showGlobalLoader(false));
+        setInterval(fetchData, 45000);
+    }
 
-    function fetchData() {
+    function logout() { localStorage.removeItem('hub_user_v14'); location.reload(); }
+
+    async function fetchData() {
         const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
-        fetch(url + '?action=getDatos').then(r => r.json()).then(d => {
+        try {
+            const r = await fetch(url + '?action=getDatos');
+            const d = await r.json();
             socios = d.socios;
             mensajes = d.msgs;
-            checkNotifications();
+            checkNotifs();
             render();
-        });
+        } catch(e) { console.error("Error de sincronización"); }
     }
 
-    // --- SISTEMA DE NOTIFICACIONES ---
-    function checkNotifications() {
-        if(currentTab === 'mensajes') {
-            updateLastSeen();
-            return;
-        }
-        // Contar mensajes de otros que sean más nuevos que el último visto
+    function checkNotifs() {
+        if(currentTab === 'mensajes') { updateLastSeen(); return; }
         const news = mensajes.filter(m => m.id > lastSeenMsgId && m.autor !== user.nombre).length;
         const badge = document.getElementById('msg-notif');
-        if(news > 0) {
-            badge.innerText = news;
-            badge.style.display = 'flex';
-        } else {
-            badge.style.display = 'none';
-        }
+        if(news > 0) { badge.innerText = news; badge.style.display = 'flex'; }
+        else { badge.style.display = 'none'; }
     }
 
     function updateLastSeen() {
@@ -175,17 +218,6 @@
         }
     }
 
-    function switchTab(t) {
-        currentTab = t;
-        if(t === 'mensajes') updateLastSeen();
-        document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block';
-        document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none';
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.add('active');
-        render();
-    }
-
-    // --- RENDERIZADO CON ESTILOS DISTINTIVOS ---
     function render() {
         const feed = document.getElementById('main-feed'); feed.innerHTML = '';
         if(currentTab === 'socios') {
@@ -194,34 +226,31 @@
                 const st = viewStates[s.id];
                 const card = document.createElement('div'); card.className = `card ${s.bloqueado ? 'locked' : ''}`;
                 card.innerHTML = `
-                    <div class="card-header"><div class="card-title">${s.nombre} ${s.apellido}</div><button onclick="toggleLock(${s.id}, ${s.bloqueado})" style="border:none; background:none; font-size:1.3rem">${s.bloqueado ? '🔒' : '🔓'}</button></div>
-                    <div style="font-size:0.75rem; color:var(--gray); margin-bottom:10px">${s.area} • ${s.contrato} • Días: ${s.asistencia.length}</div>
-                    <div style="font-size:0.7rem; color:var(--primary); font-weight:700; margin-bottom:10px">📅 Ingreso: ${formatDate(s.fecha)}</div>
-                    <div class="cal-nav"><button onclick="changeMonth(${s.id}, -1)"><</button><span>${["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][st.m]} ${st.a}</span><button onclick="changeMonth(${s.id}, 1)">></button></div>
+                    <div class="card-header"><div class="card-title">${s.nombre} ${s.apellido}</div><button onclick="toggleLock(${s.id}, ${s.bloqueado})" style="border:none; background:none; font-size:1.4rem">${s.bloqueado ? '🔒' : '🔓'}</button></div>
+                    <div style="font-size:0.75rem; color:var(--gray); margin-bottom:10px; font-weight:600">${s.area} • ${s.contrato}</div>
+                    <div style="font-size:0.75rem; color:var(--primary); font-weight:700; margin-bottom:10px">📅 Ingreso: ${formatDate(s.fecha)}</div>
+                    <div class="cal-nav"><button onclick="changeMonth(${s.id}, -1)"><</button><span>${obtenerMesAnio(st.m, st.a)}</span><button onclick="changeMonth(${s.id}, 1)">></button></div>
                     <div class="cal-grid">${genCal(s, st.m, st.a)}</div>
-                    <button onclick="del(${s.id}, 'socio')" style="color:var(--danger); font-size:0.6rem; font-weight:700; border:none; background:none; margin-top:15px">ELIMINAR SOCIO</button>
+                    <div style="margin-top:18px; display:flex; justify-content:space-between; align-items:center"><span style="font-size:0.75rem; font-weight:800; color:var(--accent)">Días: ${s.asistencia.length}</span><button onclick="del(${s.id}, 'socio')" style="color:var(--danger); font-size:0.65rem; font-weight:800; border:none; background:none">ELIMINAR</button></div>
                 `;
                 feed.appendChild(card);
             });
         } else {
             mensajes.forEach(m => {
-                const card = document.createElement('div'); 
+                const card = document.createElement('div');
                 const isMine = m.autor === user.nombre;
-                card.className = `card msg-card ${isMine ? 'msg-mine' : ''}`;
-                
-                // Color automático basado en el nombre
+                card.className = `card ${isMine ? 'msg-mine' : 'msg-other'} ${m.isSending ? 'sending' : ''}`;
                 const color = stringToColor(m.autor);
-
                 card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px">
                         <span class="author-badge" style="background:${color}">${isMine ? 'Tú' : m.autor}</span>
-                        <span style="font-size:0.6rem; color:var(--gray)">${m.fecha} ${m.hora}</span>
+                        ${m.isSending ? '<span class="load-tag">⏳ Enviando...</span>' : `<span style="font-size:0.6rem; color:var(--gray); font-weight:600">${m.fecha} ${m.hora}</span>`}
                     </div>
-                    <div style="font-size:0.7rem; color:var(--gray); margin-bottom:5px; font-weight:600">${m.area}</div>
-                    <div class="msg-content">${m.texto}</div>
-                    <div style="margin-top:10px; display:flex; gap:15px">
-                        <button onclick="openEditModal(${m.id})" style="color:var(--primary); font-size:0.65rem; font-weight:700; border:none; background:none">EDITAR</button>
-                        <button onclick="del(${m.id}, 'msg')" style="color:var(--danger); font-size:0.65rem; font-weight:700; border:none; background:none">BORRAR</button>
+                    <div style="font-size:0.65rem; color:var(--gray); margin-bottom:8px; font-weight:700">📌 Área: ${m.area}</div>
+                    <div class="msg-content" id="text-${m.id}">${m.texto}</div>
+                    <div style="margin-top:15px; display:flex; gap:20px">
+                        <button onclick="openEditModal(${m.id})" style="color:var(--primary); font-size:0.7rem; font-weight:800; border:none; background:none" ${m.isSending ? 'disabled' : ''}>EDITAR</button>
+                        <button onclick="del(${m.id}, 'msg')" style="color:var(--danger); font-size:0.7rem; font-weight:800; border:none; background:none" ${m.isSending ? 'disabled' : ''}>BORRAR</button>
                     </div>
                 `;
                 feed.appendChild(card);
@@ -229,51 +258,19 @@
         }
     }
 
-    // Generar color estable para cada nombre
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-        return "#" + "00000".substring(0, 6 - c.length) + c;
-    }
-
-    // --- LÓGICA CORE ---
     function sendMsg() {
         const txt = document.getElementById('m-texto').value; if(!txt) return;
-        const btn = document.getElementById('btn-send-msg'); btn.disabled = true;
-        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+        const btn = document.getElementById('btn-send-msg');
+        btn.disabled = true; btn.innerText = "ENVIANDO...";
+
+        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), isSending: true };
         mensajes.unshift(m); document.getElementById('m-texto').value = ''; render();
-        exec('addMsg', m).then(() => { btn.disabled = false; fetchData(); });
-    }
 
-    function saveEditMsg() {
-        const id = document.getElementById('edit-msg-id').value, txt = document.getElementById('edit-msg-text').value;
-        const m = mensajes.find(x => x.id == id); m.texto = txt;
-        render(); showModal('modal-edit', false);
-        exec('editMsg', { id, texto: txt }).then(() => fetchData());
-    }
-
-    function genCal(s, m, a) {
-        const tot = new Date(a, m + 1, 0).getDate(), off = (new Date(a, m, 1).getDay() || 7) - 1;
-        let h = '';
-        ['L','M','X','J','V','S','D'].forEach(l => h += `<div style="font-size:0.6rem; text-align:center; color:var(--gray); font-weight:700; padding-bottom:5px">${l}</div>`);
-        for(let i=0; i<off; i++) h += `<div class="day" style="background:none; border:none"></div>`;
-        for(let d=1; d<=tot; d++) { const f = `${a}-${m}-${d}`, act = s.asistencia.includes(f) ? 'active' : ''; h += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`; }
-        return h;
-    }
-
-    function mark(sId, f, locked) {
-        if(locked) return alert("Ficha Bloqueada");
-        const s = socios.find(x => x.id == sId);
-        if(confirm(s.asistencia.includes(f) ? "¿Quitar día?" : "¿Marcar día?")) {
-            if(s.asistencia.includes(f)) s.asistencia = s.asistencia.filter(x => x !== f); else s.asistencia.push(f);
-            render(); exec('markDay', { id: sId, asistencia: s.asistencia });
-        }
-    }
-
-    function exec(action, data) {
-        const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
-        return fetch(url, { method: 'POST', body: JSON.stringify({action, data}) });
+        exec('addMsg', m).then(() => {
+            m.isSending = false;
+            btn.disabled = false; btn.innerText = "ENVIAR MENSAJE";
+            fetchData();
+        });
     }
 
     function openEditModal(id) {
@@ -283,16 +280,67 @@
         showModal('modal-edit', true);
     }
 
+    function saveEditMsg() {
+        const id = document.getElementById('edit-msg-id').value;
+        const txt = document.getElementById('edit-msg-text').value;
+        const m = mensajes.find(x => x.id == id);
+        const btn = document.getElementById('btn-save-edit');
+        
+        btn.disabled = true; btn.innerText = "GUARDANDO CAMBIOS...";
+        m.isSending = true; m.texto = txt; render();
+        showModal('modal-edit', false);
+
+        exec('editMsg', { id, texto: txt }).then(() => {
+            m.isSending = false;
+            btn.disabled = false; btn.innerText = "GUARDAR CAMBIOS";
+            fetchData();
+        });
+    }
+
+    // --- FUNCIONES TÉCNICAS ---
+    function exec(action, data) {
+        const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
+        return fetch(url, { method: 'POST', body: JSON.stringify({action, data}) });
+    }
+
+    function genCal(s, m, a) {
+        const tot = new Date(a, m + 1, 0).getDate(), off = (new Date(a, m, 1).getDay() || 7) - 1;
+        let h = '';
+        ['L','M','X','J','V','S','D'].forEach(l => h += `<div style="font-size:0.65rem; text-align:center; color:var(--gray); font-weight:800; padding-bottom:8px">${l}</div>`);
+        for(let i=0; i<off; i++) h += `<div class="day" style="background:none; border:none"></div>`;
+        for(let d=1; d<=tot; d++) {
+            const f = `${a}-${m}-${d}`, act = s.asistencia.includes(f) ? 'active' : '';
+            h += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`;
+        }
+        return h;
+    }
+
+    function mark(sId, f, locked) {
+        if(locked) return alert("Ficha Bloqueada 🔒");
+        const s = socios.find(x => x.id == sId);
+        const existe = s.asistencia.includes(f);
+        if(confirm(existe ? `¿Quitar día ${f.split('-')[2]}?` : `¿Confirmar día ${f.split('-')[2]}?`)) {
+            if(existe) s.asistencia = s.asistencia.filter(x => x !== f);
+            else s.asistencia.push(f);
+            render(); exec('markDay', { id: sId, asistencia: s.asistencia });
+        }
+    }
+
     function addSocio() {
         const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false };
-        if(!s.nombre) return; socios.unshift(s); showModal('modal-socio', false); render(); exec('addSocio', s);
+        if(!s.nombre || !s.apellido) return alert("Faltan datos básicos");
+        showGlobalLoader(true, "Registrando socio...");
+        exec('addSocio', s).then(() => { showModal('modal-socio', false); fetchData().then(() => showGlobalLoader(false)); });
     }
 
     function changeMonth(id, d) { let st = viewStates[id]; st.m += d; if(st.m>11){st.m=0;st.a++} else if(st.m<0){st.m=11;st.a--} render(); }
-    function toggleLock(id, c) { if(confirm("¿Bloqueo?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
-    function del(id, t) { if(confirm('¿Eliminar?')) { if(t==='socio') socios=socios.filter(x=>x.id!=id); else mensajes=mensajes.filter(x=>x.id!=id); render(); exec('delete', {id, tipo: t}); } }
+    function toggleLock(id, c) { if(confirm(c ? "¿Desbloquear?" : "¿Bloquear?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
+    function del(id, t) { if(confirm('¿Eliminar permanentemente?')) { showGlobalLoader(true, "Eliminando..."); exec('delete', {id, tipo: t}).then(() => fetchData().then(() => showGlobalLoader(false))); } }
     function showModal(id, s) { document.getElementById(id).style.display = s ? 'flex' : 'none'; }
+    function switchTab(t) { currentTab = t; document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block'; document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none'; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); render(); if(t==='mensajes') updateLastSeen(); }
+    function obtenerMesAnio(m, a) { return ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"][m] + " " + a; }
     function formatDate(f) { if (!f) return "N/A"; let d = new Date(f); if (isNaN(d.getTime())) return f; return `${d.getUTCDate().toString().padStart(2, '0')}/${(d.getUTCMonth() + 1).toString().padStart(2, '0')}/${d.getUTCFullYear()}`; }
+    function stringToColor(str) { let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); } const c = (hash & 0x00FFFFFF).toString(16).toUpperCase(); return "#" + "00000".substring(0, 6 - c.length) + c; }
 </script>
 </body>
 </html>
