@@ -12,34 +12,30 @@
 
         header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
         header h1 { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-        .sync-btn { background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: var(--primary); }
+        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 180px; }
 
-        /* TARJETAS */
         .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: relative; }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
         .card-title { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
         
-        /* CONTADOR E INFO */
         .info-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .card-tag { font-size: 0.7rem; font-weight: 600; color: var(--gray); background: #f1f5f9; padding: 3px 8px; border-radius: 5px; }
-        .counter-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; box-shadow: 0 2px 4px rgba(16,185,129,0.2); }
+        .counter-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
 
-        /* CALENDARIO */
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 12px; }
         .cal-h { font-size: 0.65rem; font-weight: 700; text-align: center; color: var(--gray); padding-bottom: 5px; }
-        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9; font-weight: 600; transition: 0.2s; }
-        .day.active { background: var(--accent) !important; color: white; border: none; transform: scale(0.95); }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9; font-weight: 600; }
+        .day.active { background: var(--accent) !important; color: white; border: none; }
         .day.empty { background: transparent; border: none; }
 
-        /* INTERFAZ MENSAJES */
         .msg-input-panel { position: fixed; bottom: 70px; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 90; }
         .msg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 16px; outline: none; }
         .btn-send { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; }
 
-        /* NAVEGACIÓN */
         .fab { position: fixed; bottom: 90px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 30px; border: none; font-size: 32px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 100; display: flex; align-items: center; justify-content: center; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.65rem; font-weight: 700; }
@@ -49,17 +45,21 @@
         .modal-body { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .btn-del { color: var(--danger); font-size: 0.7rem; font-weight: 700; border: none; background: none; }
+        .last-sync { font-size: 0.6rem; color: var(--gray); font-weight: 400; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1 id="app-title">Socios</h1>
-    <button class="sync-btn" onclick="fetchData()">🔄 ACTUALIZAR</button>
+    <div>
+        <h1>Hub Ejecutivo</h1>
+        <p class="last-sync"><span class="status-dot"></span> Auto-sync activo</p>
+    </div>
+    <div id="sync-time" class="last-sync">Cargando...</div>
 </header>
 
 <div id="main-feed">
-    <div style="text-align:center; padding-top:50px; color:var(--gray)">Cargando...</div>
+    <div style="text-align:center; padding-top:50px; color:var(--gray)">Sincronizando con la nube...</div>
 </div>
 
 <div id="msg-input" class="msg-input-panel" style="display:none">
@@ -93,18 +93,28 @@
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; // Pega tu URL aquí
     let currentTab = 'socios', socios = [], mensajes = [];
 
-    window.onload = fetchData;
+    // INICIO Y AUTO-SYNC
+    window.onload = () => {
+        fetchData();
+        setInterval(fetchData, 60000); // Sincronización automática cada 1 minuto (60000ms)
+    };
 
     function fetchData() {
         const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
-        fetch(url + '?action=getDatos').then(r => r.json()).then(d => {
-            socios = d.socios; mensajes = d.msgs; render();
-        }).catch(() => document.getElementById('main-feed').innerHTML = '<p style="text-align:center; padding-top:40px">Error de conexión 📶</p>');
+        fetch(url + '?action=getDatos')
+        .then(r => r.json())
+        .then(d => {
+            socios = d.socios;
+            mensajes = d.msgs;
+            render();
+            const ahora = new Date();
+            document.getElementById('sync-time').innerText = "Visto: " + ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
+        })
+        .catch(e => console.log("Error de red, reintentando en 1 min..."));
     }
 
     function switchTab(t) {
         currentTab = t;
-        document.getElementById('app-title').innerText = t === 'socios' ? 'Socios' : 'Mensajes';
         document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block';
         document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none';
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -113,7 +123,11 @@
     }
 
     function render() {
-        const feed = document.getElementById('main-feed'); feed.innerHTML = '';
+        const feed = document.getElementById('main-feed');
+        // No borramos todo el feed si el usuario está viendo algo, para evitar saltos bruscos
+        // Pero en esta versión simple, reemplazamos el contenido
+        feed.innerHTML = '';
+        
         if(currentTab === 'socios') {
             socios.forEach(s => {
                 const totalDias = Array.isArray(s.asistencia) ? s.asistencia.length : 0;
@@ -162,13 +176,8 @@
         if(!Array.isArray(s.asistencia)) s.asistencia = [];
         const i = s.asistencia.indexOf(f);
         if(i > -1) s.asistencia.splice(i, 1); else s.asistencia.push(f);
-        
-        // Actualizar contador visual al instante antes de enviar a la nube
         document.getElementById('count-'+sId).innerText = 'Días: ' + s.asistencia.length;
-        
-        // Efecto visual rápido
         event.target.classList.toggle('active');
-        
         exec('markDay', { id: sId, asistencia: s.asistencia });
     }
 
