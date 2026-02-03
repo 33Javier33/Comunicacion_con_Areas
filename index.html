@@ -10,43 +10,33 @@
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
+        /* LOGIN OVERLAY */
+        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 30px; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; text-align: center; }
+        
+        /* HEADER */
         header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
-        header h1 { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
-        .last-sync { font-size: 0.6rem; color: var(--gray); font-weight: 400; }
-        .status-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; margin-right: 5px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        header h1 { font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .user-info { font-size: 0.65rem; color: var(--gray); text-align: right; }
 
-        #main-feed { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 180px; }
-
-        /* TARJETAS */
+        /* CONTENT */
+        #main-feed { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 200px; }
         .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: relative; }
         .card.locked { background: #f1f5f9; }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .card-title { font-size: 1rem; font-weight: 700; color: var(--primary); }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
         
-        .lock-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; }
-        .lock-btn.active { background: #fef2f2; color: var(--danger); border-color: #fecaca; }
-
-        .info-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .card-tag { font-size: 0.7rem; font-weight: 600; color: var(--gray); background: #f1f5f9; padding: 3px 8px; border-radius: 5px; }
-        .counter-badge { background: var(--accent); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
-
-        .entry-date { font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 5px; }
-
-        /* NAVEGACIÓN CALENDARIO */
-        .cal-nav { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 10px; margin-top: 10px; }
-        .cal-nav span { font-size: 0.8rem; font-weight: 700; text-transform: capitalize; color: var(--primary); }
-        .cal-nav button { background: white; border: 1px solid #cbd5e1; width: 30px; height: 30px; border-radius: 50%; font-weight: 900; color: var(--primary); cursor: pointer; }
-
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-        .cal-h { font-size: 0.65rem; font-weight: 700; text-align: center; color: var(--gray); padding-bottom: 5px; }
+        /* CALENDARIO */
+        .cal-nav { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 10px; margin: 10px 0; font-size: 0.8rem; font-weight: 700; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 8px; background: white; border: 1px solid #e2e8f0; font-weight: 600; }
         .day.active { background: var(--accent) !important; color: white; border: none; }
 
+        /* MENSAJES */
         .msg-input-panel { position: fixed; bottom: 70px; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #e2e8f0; z-index: 90; }
-        .msg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 16px; outline: none; }
-        .btn-send { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; }
+        .author-box { font-size: 0.75rem; font-weight: 700; color: var(--gray); margin-bottom: 10px; padding: 5px 10px; background: #f1f5f9; border-radius: 8px; display: inline-block;}
+        
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 16px; outline: none; margin-bottom: 10px; }
+        .btn-p { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer; }
 
         .fab { position: fixed; bottom: 90px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 30px; border: none; font-size: 32px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 100; display: flex; align-items: center; justify-content: center; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
@@ -59,22 +49,32 @@
 </head>
 <body>
 
-<header>
-    <div>
-        <h1>Hub Ejecutivo</h1>
-        <p class="last-sync"><span class="status-dot"></span> Auto-sync activo</p>
+<!-- PANTALLA LOGIN -->
+<div id="login-screen">
+    <div class="login-card">
+        <h2 style="margin-bottom:20px; color:var(--primary)">Acceso</h2>
+        <input type="text" id="log-nombre" placeholder="Tu Nombre">
+        <input type="text" id="log-area" placeholder="Tu Área (Ej: RRHH)">
+        <input type="password" id="log-pass" placeholder="Contraseña">
+        <button class="btn-p" onclick="intentarLogin()">ENTRAR</button>
     </div>
-    <div id="sync-time" class="last-sync">Cargando...</div>
-</header>
-
-<div id="main-feed">
-    <div style="text-align:center; padding-top:50px; color:var(--gray)">Iniciando sistema...</div>
 </div>
 
+<header>
+    <h1>Executive Hub</h1>
+    <div class="user-info">
+        <b id="user-display">-</b><br>
+        <span onclick="logout()" style="color:var(--danger); font-weight:700">Cerrar Sesión</span>
+    </div>
+</header>
+
+<div id="main-feed"></div>
+
+<!-- INPUT MENSAJES -->
 <div id="msg-input" class="msg-input-panel" style="display:none">
-    <div class="msg-row"><input type="text" id="m-autor" placeholder="Nombre"><input type="text" id="m-area" placeholder="Área"></div>
-    <input type="text" id="m-texto" placeholder="Escribe un mensaje..." style="margin-bottom:8px">
-    <button class="btn-send" onclick="sendMsg()">ENVIAR MENSAJE</button>
+    <div class="author-box" id="msg-author-tag">Cargando...</div>
+    <input type="text" id="m-texto" placeholder="Escribe un mensaje...">
+    <button class="btn-p" onclick="sendMsg()">PUBLICAR</button>
 </div>
 
 <button id="fab" class="fab" onclick="showModal(true)">+</button>
@@ -84,174 +84,156 @@
     <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">MENSAJES</button>
 </nav>
 
+<!-- MODAL SOCIO -->
 <div id="modal" class="modal" onclick="if(event.target==this) showModal(false)">
     <div class="modal-body">
-        <h2 style="margin-bottom:20px; font-size:1.2rem">Nuevo Registro</h2>
-        <input type="text" id="s-nom" placeholder="Nombre" style="margin-bottom:12px">
-        <input type="text" id="s-ape" placeholder="Apellido" style="margin-bottom:12px">
-        <input type="text" id="s-area" placeholder="Área" style="margin-bottom:12px">
-        <label style="font-size:0.7rem; font-weight:700; color:var(--gray)">FECHA DE INGRESO</label>
-        <input type="date" id="s-fec" style="margin-bottom:12px">
-        <select id="s-con" style="margin-bottom:20px"><option value="Planta">Planta</option><option value="Part-time">Part-time</option></select>
-        <button class="btn-send" onclick="addSocio()">GUARDAR SOCIO</button>
+        <h2 style="margin-bottom:15px">Nuevo Socio</h2>
+        <input type="text" id="s-nom" placeholder="Nombre">
+        <input type="text" id="s-ape" placeholder="Apellido">
+        <input type="text" id="s-area" placeholder="Área">
+        <input type="date" id="s-fec">
+        <select id="s-con"><option value="Planta">Planta</option><option value="Part-time">Part-time</option></select>
+        <button class="btn-p" onclick="addSocio()">GUARDAR</button>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; 
-    let currentTab = 'socios', socios = [], mensajes = [];
-    
-    // Objeto para guardar en qué mes está viendo cada socio (independiente)
-    let viewStates = {}; 
+    const CLAVE_FIJA = '1234'; // <--- CAMBIA TU CLAVE AQUÍ
 
-    window.onload = () => { fetchData(); setInterval(fetchData, 60000); };
+    let user = null, currentTab = 'socios', socios = [], mensajes = [], viewStates = {};
+
+    window.onload = () => {
+        const saved = localStorage.getItem('hub_user');
+        if(saved) {
+            user = JSON.parse(saved);
+            document.getElementById('login-screen').style.display = 'none';
+            iniciarApp();
+        }
+    };
+
+    function intentarLogin() {
+        const n = document.getElementById('log-nombre').value;
+        const a = document.getElementById('log-area').value;
+        const p = document.getElementById('log-pass').value;
+        if(p === CLAVE_FIJA && n && a) {
+            user = { nombre: n, area: a };
+            localStorage.setItem('hub_user', JSON.stringify(user));
+            document.getElementById('login-screen').style.display = 'none';
+            iniciarApp();
+        } else { alert("Datos incorrectos"); }
+    }
+
+    function iniciarApp() {
+        document.getElementById('user-display').innerText = `${user.nombre} (${user.area})`;
+        document.getElementById('msg-author-tag').innerText = `Publicando como: ${user.nombre}`;
+        fetchData();
+        setInterval(fetchData, 60000);
+    }
+
+    function logout() {
+        localStorage.removeItem('hub_user');
+        location.reload();
+    }
 
     function fetchData() {
         const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
         fetch(url + '?action=getDatos').then(r => r.json()).then(d => {
             socios = d.socios; mensajes = d.msgs;
-            // Inicializar estados de vista si no existen
-            socios.forEach(s => {
-                if(!viewStates[s.id]) {
-                    const hoy = new Date();
-                    viewStates[s.id] = { m: hoy.getMonth(), a: hoy.getFullYear() };
-                }
-            });
+            socios.forEach(s => { if(!viewStates[s.id]) { const h = new Date(); viewStates[s.id] = { m: h.getMonth(), a: h.getFullYear() }; } });
             render();
-            const ahora = new Date();
-            document.getElementById('sync-time').innerText = "Visto: " + ahora.getHours() + ":" + ahora.getMinutes().toString().padStart(2, '0');
         });
-    }
-
-    function switchTab(t) {
-        currentTab = t;
-        document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block';
-        document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none';
-        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-        document.getElementById('tab-'+t).classList.add('active');
-        render();
     }
 
     function render() {
         const feed = document.getElementById('main-feed'); feed.innerHTML = '';
         if(currentTab === 'socios') {
             socios.forEach(s => {
-                const state = viewStates[s.id];
-                const totalDias = Array.isArray(s.asistencia) ? s.asistencia.length : 0;
-                const card = document.createElement('div'); 
-                card.className = 'card ' + (s.bloqueado ? 'locked' : '');
+                const st = viewStates[s.id];
+                const card = document.createElement('div'); card.className = `card ${s.bloqueado ? 'locked' : ''}`;
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="card-title">${s.nombre} ${s.apellido}</div>
-                        <button class="lock-btn ${s.bloqueado ? 'active' : ''}" onclick="toggleLock(${s.id}, ${s.bloqueado})">
-                            ${s.bloqueado ? '🔒' : '🔓'}
-                        </button>
+                        <button onclick="toggleLock(${s.id}, ${s.bloqueado})" style="border:none; background:none; font-size:1.2rem">${s.bloqueado ? '🔒' : '🔓'}</button>
                     </div>
-                    <div class="info-bar">
-                        <div class="card-tag">${s.area} • ${s.contrato}</div>
-                        <div class="counter-badge">Días: ${totalDias}</div>
-                    </div>
-                    <div class="entry-date">📅 Ingreso: ${formatDate(s.fecha)}</div>
-                    
+                    <div style="font-size:0.7rem; color:var(--gray); margin-bottom:10px">${s.area} • ${s.contrato} • Días: ${s.asistencia.length}</div>
                     <div class="cal-nav">
-                        <button onclick="changeMonth(${s.id}, -1)"> < </button>
-                        <span>${obtenerNombreMes(state.m)} ${state.a}</span>
-                        <button onclick="changeMonth(${s.id}, 1)"> > </button>
+                        <button onclick="changeMonth(${s.id}, -1)"><</button>
+                        <span>${["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][st.m]} ${st.a}</span>
+                        <button onclick="changeMonth(${s.id}, 1)">></button>
                     </div>
-
-                    <div class="cal-grid">${genCal(s, state.m, state.a)}</div>
-                    <button onclick="del(${s.id}, 'socio')" style="margin-top:15px; border:none; background:none; color:var(--danger); font-size:0.65rem; font-weight:700;">ELIMINAR SOCIO</button>
+                    <div class="cal-grid">${genCal(s, st.m, st.a)}</div>
+                    <button onclick="del(${s.id}, 'socio')" style="margin-top:10px; border:none; background:none; color:var(--danger); font-size:0.6rem; font-weight:700">ELIMINAR SOCIO</button>
                 `;
                 feed.appendChild(card);
             });
         } else {
             mensajes.forEach(m => {
                 const card = document.createElement('div'); card.className = 'card'; card.style.borderLeft = '5px solid var(--accent)';
-                card.innerHTML = `<button style="float:right; border:none; background:none; color:var(--danger); font-size:0.7rem;" onclick="del(${m.id}, 'msg')">X</button>
-                    <div style="font-size:0.75rem; color:var(--gray); margin-bottom:5px"><b>${m.autor}</b> (${m.area})</div>
-                    <div style="font-size:0.95rem;">${m.texto}</div>
-                    <div style="font-size:0.6rem; color:var(--gray); margin-top:8px">${m.fecha} - ${m.hora}</div>`;
+                card.innerHTML = `
+                    <div style="font-size:0.7rem; color:var(--gray); margin-bottom:5px"><b>${m.autor}</b> (${m.area}) • ${m.fecha}</div>
+                    <div id="text-${m.id}" style="font-size:0.95rem">${m.texto}</div>
+                    <div style="margin-top:10px">
+                        <button onclick="editMsg(${m.id})" style="color:var(--primary); font-size:0.65rem; font-weight:700; border:none; background:none">EDITAR</button>
+                        <button onclick="del(${m.id}, 'msg')" style="color:var(--danger); font-size:0.65rem; font-weight:700; border:none; background:none; margin-left:15px">BORRAR</button>
+                    </div>
+                `;
                 feed.appendChild(card);
             });
         }
     }
 
-    function changeMonth(sId, dir) {
-        let state = viewStates[sId];
-        state.m += dir;
-        if(state.m > 11) { state.m = 0; state.a++; }
-        if(state.m < 0) { state.m = 11; state.a--; }
-        render();
-    }
-
     function genCal(s, mes, anio) {
         const tot = new Date(anio, mes + 1, 0).getDate();
         const off = (new Date(anio, mes, 1).getDay() || 7) - 1;
-        const ast = Array.isArray(s.asistencia) ? s.asistencia : [];
         let html = '';
-        ['L','M','X','J','V','S','D'].forEach(l => html += `<div class="cal-h">${l}</div>`);
-        for(let i=0; i<off; i++) html += `<div class="day empty"></div>`;
+        ['L','M','X','J','V','S','D'].forEach(l => html += `<div style="font-size:0.6rem; text-align:center; color:var(--gray); padding-bottom:5px">${l}</div>`);
+        for(let i=0; i<off; i++) html += `<div class="day" style="background:none; border:none"></div>`;
         for(let d=1; d<=tot; d++) {
-            const f = `${anio}-${mes}-${d}`; // Formato de guardado
-            const act = ast.includes(f) ? 'active' : '';
+            const f = `${anio}-${mes}-${d}`, act = s.asistencia.includes(f) ? 'active' : '';
             html += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`;
         }
         return html;
     }
 
-    function mark(sId, f, locked) {
-        if(locked) return alert("Ficha Bloqueada");
-        const s = socios.find(x => x.id == sId);
-        const existe = s.asistencia.includes(f);
-        const d = f.split('-')[2];
-        if(confirm(existe ? `¿Eliminar día ${d}?` : `¿Marcar día ${d}?`)) {
-            if(existe) s.asistencia = s.asistencia.filter(x => x !== f);
-            else s.asistencia.push(f);
-            render();
-            exec('markDay', { id: sId, asistencia: s.asistencia });
+    function editMsg(id) {
+        const nuevo = prompt("Edita tu mensaje:");
+        if(nuevo) {
+            document.getElementById('text-'+id).innerText = nuevo;
+            exec('editMsg', { id, texto: nuevo });
         }
-    }
-
-    function obtenerNombreMes(m) {
-        return ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][m];
-    }
-
-    function formatDate(f) {
-        if (!f) return "Sin fecha";
-        let d = new Date(f);
-        if (isNaN(d.getTime())) return f;
-        return `${d.getUTCDate().toString().padStart(2, '0')}/${(d.getUTCMonth() + 1).toString().padStart(2, '0')}/${d.getUTCFullYear()}`;
-    }
-
-    function toggleLock(sId, current) {
-        if(confirm(current ? "¿Desbloquear?" : "¿Bloquear?")) {
-            const s = socios.find(x => x.id == sId);
-            s.bloqueado = !current;
-            render();
-            exec('toggleLock', { id: sId, bloqueado: s.bloqueado });
-        }
-    }
-
-    function addSocio() {
-        const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false };
-        if(!s.nombre) return; socios.unshift(s); showModal(false); render(); exec('addSocio', s);
     }
 
     function sendMsg() {
-        const aut = document.getElementById('m-autor').value, txt = document.getElementById('m-texto').value;
-        if(!aut || !txt) return;
-        const m = { id: Date.now(), autor: aut, area: document.getElementById('m-area').value || 'Gral', texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-        mensajes.unshift(m); document.getElementById('m-texto').value=''; render(); exec('addMsg', m);
+        const t = document.getElementById('m-texto').value;
+        if(!t) return;
+        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: t, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() };
+        mensajes.unshift(m); document.getElementById('m-texto').value = ''; render();
+        exec('addMsg', m);
     }
 
-    function del(id, t) { if(confirm('¿Eliminar?')) { if(t==='socio') socios=socios.filter(x=>x.id!=id); else mensajes=mensajes.filter(x=>x.id!=id); render(); exec('delete', {id, tipo: t}); } }
-
-    function exec(action, data) {
-        const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
-        fetch(url, { method: 'POST', body: JSON.stringify({action, data}) });
+    function mark(sId, f, locked) {
+        if(locked) return alert("Bloqueado");
+        const s = socios.find(x => x.id == sId);
+        if(confirm(s.asistencia.includes(f) ? "¿Eliminar?" : "¿Marcar?")) {
+            if(s.asistencia.includes(f)) s.asistencia = s.asistencia.filter(x => x !== f);
+            else s.asistencia.push(f);
+            render(); exec('markDay', { id: sId, asistencia: s.asistencia });
+        }
     }
 
+    function changeMonth(id, dir) { 
+        let st = viewStates[id]; st.m += dir;
+        if(st.m > 11) { st.m = 0; st.a++; } else if(st.m < 0) { st.m = 11; st.a--; }
+        render(); 
+    }
+
+    function switchTab(t) { currentTab = t; document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block'; document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none'; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); render(); }
     function showModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+    function toggleLock(id, c) { if(confirm("¿Cambiar bloqueo?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
+    function addSocio() { const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false }; if(!s.nombre) return; socios.unshift(s); showModal(false); render(); exec('addSocio', s); }
+    function del(id, t) { if(confirm('¿Eliminar?')) { if(t==='socio') socios=socios.filter(x=>x.id!=id); else mensajes=mensajes.filter(x=>x.id!=id); render(); exec('delete', {id, tipo: t}); } }
+    function exec(action, data) { const url = location.href.includes('macros') ? location.href : SCRIPT_URL; fetch(url, { method: 'POST', body: JSON.stringify({action, data}) }); }
 </script>
 </body>
 </html>
