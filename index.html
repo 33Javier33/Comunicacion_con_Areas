@@ -3,152 +3,152 @@
 <head>
     <base target="_top">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #1e293b; --s: #10b981; --d: #ef4444; --bg: #f1f5f9; --txt: #334155; --gray: #64748b; }
+        :root { --primary: #0f172a; --accent: #10b981; --danger: #ef4444; --bg: #f8fafc; --text: #1e293b; --gray: #64748b; }
+        
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); color: var(--txt); display: flex; flex-direction: column; height: 100vh; width: 100vw; overflow: hidden; }
-        @media (min-width: 768px) { body { flex-direction: row; } }
+        body { background: var(--bg); color: var(--text); height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Navegación PC */
-        .sidebar { width: 260px; background: var(--p); color: white; padding: 25px; display: none; flex-direction: column; }
-        @media (min-width: 768px) { .sidebar { display: flex; } }
-        .sidebar h2 { font-size: 0.9rem; color: var(--s); margin-bottom: 30px; letter-spacing: 1px; text-transform: uppercase; }
-        .nav-btn { background: none; border: none; color: white; text-align: left; padding: 14px; border-radius: 12px; cursor: pointer; opacity: 0.6; margin-bottom: 5px; font-size: 0.9rem; }
-        .nav-btn.active { opacity: 1; background: rgba(255,255,255,0.1); font-weight: bold; }
+        /* HEADER APP */
+        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        header h1 { font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+        .sync-btn { background: #f1f5f9; border: none; padding: 8px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: var(--primary); }
 
-        /* Contenido */
-        .main { flex: 1; display: flex; flex-direction: column; height: 100%; width: 100%; position: relative; }
-        header { background: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
-        header h3 { font-size: 0.95rem; }
+        /* ÁREA DE CONTENIDO (Scroll) */
+        #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 180px; }
+
+        /* TARJETAS MÓVILES */
+        .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .card-title { font-size: 1.05rem; font-weight: 700; color: var(--primary); }
+        .card-tag { font-size: 0.7rem; font-weight: 600; color: var(--gray); background: #f1f5f9; padding: 3px 8px; border-radius: 5px; margin-top: 4px; display: inline-block; }
+
+        /* CALENDARIO MÓVIL */
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 15px; }
+        .cal-h { font-size: 0.65rem; font-weight: 700; text-align: center; color: var(--gray); padding-bottom: 5px; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9; font-weight: 600; }
+        .day.active { background: var(--accent) !important; color: white; border: none; box-shadow: 0 2px 4px rgba(16,185,129,0.3); }
+        .day.empty { background: transparent; border: none; }
+
+        /* CANAL DE MENSAJES FORM */
+        .msg-input-panel { position: fixed; bottom: 70px; left: 0; right: 0; background: white; padding: 15px; border-top: 1px solid #e2e8f0; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 90; }
+        .msg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+        .btn-send { background: var(--primary); color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; }
+
+        /* BOTÓN FLOTANTE (+) */
+        .fab { position: fixed; bottom: 90px; right: 20px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 30px; border: none; font-size: 32px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); z-index: 100; display: flex; align-items: center; justify-content: center; }
+
+        /* NAVEGACIÓN INFERIOR TABS */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.65rem; font-weight: 700; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); border-top: 3px solid var(--primary); }
+
+        /* MODAL REGISTRO */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); backdrop-filter: blur(5px); display: none; align-items: flex-end; z-index: 2000; }
+        .modal-body { background: white; width: 100%; border-radius: 25px 25px 0 0; padding: 25px; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        #content { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 160px; } /* Espacio para el input en móvil */
-        @media (min-width: 768px) { #content { padding: 25px; padding-bottom: 100px; } }
-
-        /* Tarjetas (Responsivas) */
-        .card { background: white; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .card-title { font-weight: 700; color: var(--p); font-size: 1rem; }
-        .card-sub { font-size: 0.75rem; color: var(--gray); margin-top: 3px; }
-
-        /* Calendario (Ajustado para pantallas pequeñas) */
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 10px; }
-        .cal-h { font-size: 0.6rem; font-weight: 800; text-align: center; color: var(--gray); padding-bottom: 3px; }
-        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; border-radius: 4px; background: #f8fafc; border: 1px solid #f1f5f9; cursor: pointer; }
-        .day.active { background: var(--s) !important; color: white; border: none; font-weight: bold; }
-
-        /* Modal (Llenado automático en móvil) */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 15px; }
-        .modal-body { background: white; padding: 20px; border-radius: 16px; width: 100%; max-width: 400px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; outline: none; }
-
-        /* Input Mensajes Flotante en Móvil */
-        .msg-input-area { background: white; padding: 12px; border-top: 1px solid #e2e8f0; position: fixed; bottom: 65px; left: 0; right: 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        @media (min-width: 768px) { .msg-input-area { position: static; padding: 20px; } }
-
-        .btn-p { background: var(--p); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
-        
-        .fab { position: fixed; bottom: 85px; right: 20px; background: var(--p); color: white; width: 56px; height: 56px; border-radius: 28px; border: none; font-size: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 500; }
-        
-        /* Navegación Móvil */
-        .mobile-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background: var(--p); display: flex; z-index: 2000; }
-        @media (min-width: 768px) { .mobile-nav { display: none; } }
-        .mobile-nav button { flex: 1; color: white; background: none; border: none; font-size: 0.7rem; font-weight: 600; opacity: 0.5; }
-        .mobile-nav button.active { opacity: 1; border-top: 3px solid var(--s); }
-        .btn-del { color: var(--d); font-size: 0.65rem; font-weight: 700; border: none; background: none; float: right; }
+        .btn-del { color: var(--danger); font-size: 0.7rem; font-weight: 700; border: none; background: none; }
     </style>
 </head>
 <body>
 
-<aside class="sidebar">
-    <h2>INFO, INGRESOS NUEVOS</h2>
-    <button class="nav-btn active" id="btn-tab-socios" onclick="switchTab('socios')">Socios Ingresados</button>
-    <button class="nav-btn" id="btn-tab-mensajes" onclick="switchTab('mensajes')">Canal de Mensajes</button>
-</aside>
+<header>
+    <h1 id="app-title">Socios</h1>
+    <button class="sync-btn" onclick="fetchData()">🔄 ACTUALIZAR</button>
+</header>
 
-<main class="main">
-    <header>
-        <h3 id="v-title">Socios</h3>
-        <button onclick="load()" style="background:none; border:none; color:var(--p); font-size:0.7rem; font-weight:bold;">🔄 ACTUALIZAR</button>
-    </header>
+<div id="main-feed">
+    <div style="text-align:center; padding-top:50px; color:var(--gray)">Cargando aplicación móvil...</div>
+</div>
 
-    <div id="content">Cargando datos...</div>
-
-    <div id="msg-input" class="msg-input-area" style="display:none">
-        <div style="display:flex; gap:8px;">
-            <input type="text" id="m-autor" placeholder="Tu Nombre" style="margin:0; flex:1">
-            <input type="text" id="m-area" placeholder="Tu Área" style="margin:0; flex:1">
-        </div>
-        <input type="text" id="m-texto" placeholder="Escribe un mensaje...">
-        <button class="btn-p" style="width:100%" onclick="sendMsg()">PUBLICAR MENSAJE</button>
+<!-- Formulario Mensajes (Solo en tab mensajes) -->
+<div id="msg-input" class="msg-input-panel" style="display:none">
+    <div class="msg-row">
+        <input type="text" id="m-autor" placeholder="Tu Nombre">
+        <input type="text" id="m-area" placeholder="Tu Área">
     </div>
+    <input type="text" id="m-texto" placeholder="Escribe un mensaje..." style="margin-bottom:8px">
+    <button class="btn-send" onclick="sendMsg()">ENVIAR AL CANAL</button>
+</div>
 
-    <button id="fab" class="fab" onclick="showModal(true)">+</button>
-</main>
+<!-- Botón Agregar Socio (Solo en tab socios) -->
+<button id="fab" class="fab" onclick="showModal(true)">+</button>
 
-<nav class="mobile-nav">
-    <button class="active" id="m-btn-socios" onclick="switchTab('socios')">SOCIOS</button>
-    <button id="m-btn-mensajes" onclick="switchTab('mensajes')">MENSAJES</button>
+<!-- Nav Inferior -->
+<nav class="bottom-nav">
+    <button class="nav-item active" id="tab-socios" onclick="switchTab('socios')">SOCIOS</button>
+    <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">MENSAJES</button>
 </nav>
 
+<!-- Modal Registro Socio -->
 <div id="modal" class="modal" onclick="if(event.target==this) showModal(false)">
     <div class="modal-body">
-        <h3 style="margin-bottom:15px;">Nuevo Socio</h3>
-        <input type="text" id="s-nom" placeholder="Nombre">
-        <input type="text" id="s-ape" placeholder="Apellido">
-        <input type="text" id="s-area" placeholder="Área">
-        <input type="date" id="s-fec">
-        <select id="s-con">
+        <h2 style="margin-bottom:20px; font-size:1.2rem">Nuevo Registro</h2>
+        <input type="text" id="s-nom" placeholder="Nombre" style="margin-bottom:12px">
+        <input type="text" id="s-ape" placeholder="Apellido" style="margin-bottom:12px">
+        <input type="text" id="s-area" placeholder="Área de trabajo" style="margin-bottom:12px">
+        <label style="font-size:0.7rem; font-weight:700; color:var(--gray)">FECHA DE INGRESO</label>
+        <input type="date" id="s-fec" style="margin-bottom:12px">
+        <select id="s-con" style="margin-bottom:20px">
             <option value="Planta">Planta</option>
             <option value="Part-time">Part-time</option>
         </select>
-        <button class="btn-p" style="width:100%" onclick="addSocio()">GUARDAR SOCIO</button>
+        <button class="btn-send" onclick="addSocio()">GUARDAR SOCIO</button>
+        <button onclick="showModal(false)" style="width:100%; border:none; background:none; margin-top:15px; color:var(--danger); font-weight:700; font-size:0.8rem">CANCELAR</button>
     </div>
 </div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; // Pega aquí tu URL de implementación
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; // Pega aquí tu URL de despliegue
     let currentTab = 'socios', socios = [], mensajes = [];
 
-    window.onload = load;
+    window.onload = fetchData;
 
-    function load() {
+    function fetchData() {
         const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
         fetch(url + '?action=getDatos').then(r => r.json()).then(d => {
             socios = d.socios; mensajes = d.msgs; render();
-        }).catch(() => document.getElementById('content').innerHTML = "Error al conectar con la nube.");
+        }).catch(() => document.getElementById('main-feed').innerHTML = '<p style="text-align:center; padding-top:40px">Error de conexión 📶</p>');
     }
 
     function switchTab(t) {
         currentTab = t;
-        document.getElementById('v-title').innerText = t === 'socios' ? 'Socios' : 'Mensajes';
+        document.getElementById('app-title').innerText = t === 'socios' ? 'Socios' : 'Canal de Mensajes';
         document.getElementById('msg-input').style.display = t === 'socios' ? 'none' : 'block';
         document.getElementById('fab').style.display = t === 'socios' ? 'block' : 'none';
-        document.querySelectorAll('.nav-btn, .mobile-nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-tab-'+t)?.classList.add('active');
-        document.getElementById('m-btn-'+t)?.classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-'+t).classList.add('active');
         render();
     }
 
     function render() {
-        const cont = document.getElementById('content'); cont.innerHTML = '';
+        const feed = document.getElementById('main-feed'); feed.innerHTML = '';
         if(currentTab === 'socios') {
             socios.forEach(s => {
                 const card = document.createElement('div'); card.className = 'card';
-                card.innerHTML = `<button class="btn-del" onclick="del(${s.id}, 'socio')">BORRAR</button>
-                    <div class="card-title">${s.nombre} ${s.apellido}</div>
-                    <div class="card-sub">${s.area} • ${s.contrato}</div>
-                    <div class="cal-grid">${genCal(s)}</div>`;
-                cont.appendChild(card);
+                card.innerHTML = `<div class="card-header">
+                    <div><div class="card-title">${s.nombre} ${s.apellido}</div><div class="card-tag">${s.area} • ${s.contrato}</div></div>
+                    <button class="btn-del" onclick="del(${s.id}, 'socio')">BORRAR</button>
+                </div>
+                <div style="font-size:0.75rem; color:var(--gray)">📅 Ingreso: ${formatDate(s.fecha)}</div>
+                <div class="cal-grid">${genCal(s)}</div>`;
+                feed.appendChild(card);
             });
         } else {
             mensajes.forEach(m => {
-                const card = document.createElement('div'); card.className = 'card'; card.style.borderLeft = '4px solid var(--s)';
-                card.innerHTML = `<button class="btn-del" onclick="del(${m.id}, 'msg')">BORRAR</button>
-                    <div style="font-size:0.7rem; color:var(--gray)"><b>${m.autor}</b> (${m.area})</div>
-                    <div style="font-size:0.9rem; margin-top:5px">${m.texto}</div>`;
-                cont.appendChild(card);
+                const card = document.createElement('div'); card.className = 'card'; card.style.borderLeft = '5px solid var(--accent)';
+                card.innerHTML = `<button class="btn-del" style="float:right" onclick="del(${m.id}, 'msg')">ELIMINAR</button>
+                    <div style="font-size:0.75rem; color:var(--gray); margin-bottom:5px"><b>${m.autor}</b> (${m.area})</div>
+                    <div style="font-size:0.95rem; line-height:1.4">${m.texto}</div>
+                    <div style="font-size:0.65rem; color:var(--gray); margin-top:8px">${m.fecha} - ${m.hora}</div>`;
+                feed.appendChild(card);
             });
         }
     }
@@ -159,7 +159,7 @@
         const ast = Array.isArray(s.asistencia) ? s.asistencia : [];
         let html = '';
         ['L','M','X','J','V','S','D'].forEach(l => html += `<div class="cal-h">${l}</div>`);
-        for(let i=0; i<off; i++) html += `<div class="day" style="background:none; border:none"></div>`;
+        for(let i=0; i<off; i++) html += `<div class="day empty"></div>`;
         for(let d=1; d<=tot; d++) {
             const f = `${a}-${m}-${d}`, act = ast.includes(f) ? 'active' : '';
             html += `<div class="day ${act}" onclick="mark(${s.id}, '${f}')">${d}</div>`;
@@ -177,17 +177,18 @@
 
     function addSocio() {
         const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [] };
-        if(!s.nombre) return; socios.unshift(s); showModal(false); render(); exec('addSocio', s);
+        if(!s.nombre || !s.apellido) { alert('Nombre y apellido obligatorios'); return; }
+        socios.unshift(s); showModal(false); render(); exec('addSocio', s);
     }
 
     function sendMsg() {
         const aut = document.getElementById('m-autor').value, txt = document.getElementById('m-texto').value;
-        if(!aut || !txt) return;
-        const m = { id: Date.now(), autor: aut, area: document.getElementById('m-area').value, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() };
+        if(!aut || !txt) { alert('Nombre y mensaje obligatorios'); return; }
+        const m = { id: Date.now(), autor: aut, area: document.getElementById('m-area').value || 'General', texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
         mensajes.unshift(m); document.getElementById('m-texto').value=''; render(); exec('addMsg', m);
     }
 
-    function del(id, t) { if(confirm('¿Eliminar?')) { if(t==='socio') socios=socios.filter(x=>x.id!=id); else mensajes=mensajes.filter(x=>x.id!=id); render(); exec('delete', {id, tipo: t}); } }
+    function del(id, t) { if(confirm('¿Eliminar registro?')) { if(t==='socio') socios=socios.filter(x=>x.id!=id); else mensajes=mensajes.filter(x=>x.id!=id); render(); exec('delete', {id, tipo: t}); } }
 
     function exec(action, data) {
         const url = location.href.includes('macros') ? location.href : SCRIPT_URL;
@@ -195,6 +196,10 @@
     }
 
     function showModal(s) { document.getElementById('modal').style.display = s ? 'flex' : 'none'; }
+    function formatDate(f) { 
+        if(!f) return ""; const d = new Date(f); 
+        return isNaN(d) ? f : `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+    }
 </script>
 </body>
 </html>
