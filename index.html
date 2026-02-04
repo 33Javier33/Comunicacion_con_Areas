@@ -14,6 +14,9 @@
         #global-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .spinner { width: 45px; height: 45px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .loading-card { opacity: 0.6; filter: grayscale(0.7); animation: pulseLoad 1.5s infinite; pointer-events: none; }
+        @keyframes pulseLoad { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.3; } }
 
         /* --- LOGIN --- */
         #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 5000; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; align-items: center; }
@@ -22,7 +25,7 @@
         .quick-item { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); padding: 15px; border-radius: 20px; color: white; position: relative; }
         .btn-del-user { position: absolute; top: 5px; right: 5px; color: var(--danger); background: none; border: none; font-size: 1.2rem; font-weight: 800; }
 
-        /* --- UI COMPONENTS --- */
+        /* --- UI --- */
         header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
         header h1 { font-size: 1rem; font-weight: 800; color: var(--primary); }
         #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 250px; scroll-behavior: smooth; }
@@ -34,11 +37,15 @@
 
         .msg-mine { background: #f0fdf4; border-left: 5px solid var(--accent); }
         .author-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 8px; color: white; display: inline-block; margin-bottom: 8px; text-transform: uppercase; }
+        .msg-content { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; margin-top: 5px; }
 
+        /* --- BOTTOM NAV & BADGES --- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.65rem; font-weight: 800; position: relative; }
         .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); }
-        .notif { position: absolute; top: 12px; right: 28%; background: var(--danger); color: white; font-size: 0.65rem; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; border: 2px solid white; }
+        
+        /* Notificaciones Rojas */
+        .notif { position: absolute; top: 12px; right: 26%; background: var(--danger); color: white; font-size: 0.65rem; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; border: 2.5px solid white; font-weight: 900; }
 
         .btn-p { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; }
         .btn-act { border: none; background: none; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
@@ -71,7 +78,7 @@
         <input type="text" id="log-apellido" placeholder="Apellido">
         <input type="text" id="log-area" placeholder="Área">
         <input type="password" id="log-pass" placeholder="Contraseña">
-        <button class="btn-p" onclick="intentarLogin()">ACCEDER</button>
+        <button class="btn-p" id="btn-login-main" onclick="intentarLogin()">ACCEDER</button>
     </div>
 </div>
 
@@ -86,9 +93,9 @@
 <div id="main-feed"></div>
 
 <div id="msg-input-bar" class="modal" style="background:none; height:auto; top:auto; bottom:75px; align-items:flex-end; display:none">
-    <div class="modal-body" style="padding: 15px; border-radius: 0;">
+    <div class="modal-body" style="padding: 15px; border-radius: 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1);">
         <textarea id="m-texto" placeholder="Escribe un mensaje..."></textarea>
-        <button class="btn-p" onclick="sendMsg()">ENVIAR AHORA</button>
+        <button class="btn-p" id="btn-send-msg" onclick="sendMsg()">ENVIAR AHORA</button>
     </div>
 </div>
 
@@ -96,8 +103,12 @@
 
 <nav class="bottom-nav">
     <button class="nav-item active" id="tab-socios" onclick="switchTab('socios')">SOCIOS</button>
-    <button class="nav-item" id="tab-ausencias" onclick="switchTab('ausencias')">AUSENCIAS</button>
-    <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">CANAL <div id="msg-notif" class="notif">0</div></button>
+    <button class="nav-item" id="tab-ausencias" onclick="switchTab('ausencias')">
+        AUSENCIAS <div id="aus-notif" class="notif">0</div>
+    </button>
+    <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">
+        CANAL <div id="msg-notif" class="notif">0</div>
+    </button>
 </nav>
 
 <!-- MODALES -->
@@ -130,7 +141,7 @@
         <h2 style="margin-bottom:20px; font-weight: 800;">Editar Mensaje</h2>
         <textarea id="edit-msg-text" style="height:200px;"></textarea>
         <input type="hidden" id="edit-msg-id">
-        <button class="btn-p" onclick="saveEditMsg()">GUARDAR CAMBIOS</button>
+        <button class="btn-p" id="btn-save-msg-edit" onclick="saveEditMsg()">GUARDAR CAMBIOS</button>
     </div>
 </div>
 
@@ -143,7 +154,7 @@
         <input type="date" id="ea-fec">
         <textarea id="ea-nota" placeholder="Nota..." style="height:120px"></textarea>
         <input type="hidden" id="ea-id">
-        <button class="btn-p" onclick="saveEditAusencia()">ACTUALIZAR TODO</button>
+        <button class="btn-p" id="btn-save-aus-edit" onclick="saveEditAusencia()">ACTUALIZAR TODO</button>
     </div>
 </div>
 
@@ -153,12 +164,13 @@
 
     let user = null, currentTab = 'socios', socios = [], mensajes = [], usuarios = [], ausencias = [], viewStates = {};
     let lastSeenMsgId = localStorage.getItem('lastSeenMsgId') || 0;
+    let lastSeenAusId = localStorage.getItem('lastSeenAusId') || 0;
 
     window.onload = () => {
         showGlobalLoader(true, "Conectando...");
         fetchData().then(() => {
             showGlobalLoader(false);
-            const saved = localStorage.getItem('hub_user_v20');
+            const saved = localStorage.getItem('hub_user_v23');
             if(saved) { user = JSON.parse(saved); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); }
             else { renderQuickAccess(); }
         });
@@ -198,11 +210,13 @@
         } 
         else if(currentTab === 'ausencias') {
             ausencias.forEach(a => {
-                const card = document.createElement('div'); card.className = 'card ausencia-card';
+                const card = document.createElement('div'); 
+                const isSaving = a.isSaving ? 'loading-card' : '';
+                card.className = `card ausencia-card ${isSaving}`;
                 card.innerHTML = `
                     <div class="card-header"><div style="font-weight:800">${a.nombre} ${a.apellido}</div><span style="font-size:0.6rem; color:var(--gray)">${a.fechaCreado}</span></div>
                     <div style="font-size:0.75rem; color:var(--warning); font-weight:800">⚠️ Ausencia: ${formatDate(a.fechaAusencia)} (${a.area})</div>
-                    <div class="note-box">${a.note || a.nota || 'Sin nota'}</div>
+                    <div class="note-box">${a.nota || 'Sin nota'}</div>
                     <div style="font-size:0.6rem; color:var(--gray); margin-top:10px">Registrador: <b>${a.registrador}</b></div>
                     <div style="margin-top:15px; display:flex">
                         <button class="btn-act" style="color:var(--primary); margin-right:15px" onclick="openEditAus(${a.id})">EDITAR</button>
@@ -213,7 +227,10 @@
         }
         else {
             mensajes.forEach(m => {
-                const card = document.createElement('div'); card.className = `card ${m.autor === user.nombre ? 'msg-mine' : ''}`;
+                const card = document.createElement('div'); 
+                const isMine = m.autor === user.nombre;
+                const isSending = m.isSending ? 'loading-card' : '';
+                card.className = `card ${isMine ? 'msg-mine' : ''} ${isSending}`;
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; margin-bottom:8px">
                         <span class="author-badge" style="background:${stringToColor(m.autor)}">${m.autor}</span>
@@ -229,6 +246,40 @@
         }
     }
 
+    // --- NOTIFICACIONES ---
+    function checkNotifs() {
+        // Mensajes
+        if(currentTab === 'mensajes') updateLastSeen('msg');
+        else {
+            const newMsgs = mensajes.filter(m => m.id > lastSeenMsgId && m.autor !== user.nombre).length;
+            const bMsg = document.getElementById('msg-notif');
+            bMsg.innerText = newMsgs;
+            bMsg.style.display = newMsgs > 0 ? 'flex' : 'none';
+        }
+        // Ausencias
+        if(currentTab === 'ausencias') updateLastSeen('aus');
+        else {
+            const newAus = ausencias.filter(a => a.id > lastSeenAusId && !a.registrador.includes(user.nombre)).length;
+            const bAus = document.getElementById('aus-notif');
+            bAus.innerText = newAus;
+            bAus.style.display = newAus > 0 ? 'flex' : 'none';
+        }
+    }
+
+    function updateLastSeen(type) {
+        if(type === 'msg' && mensajes.length > 0) {
+            lastSeenMsgId = Math.max(...mensajes.map(m => m.id));
+            localStorage.setItem('lastSeenMsgId', lastSeenMsgId);
+            document.getElementById('msg-notif').style.display = 'none';
+        }
+        if(type === 'aus' && ausencias.length > 0) {
+            lastSeenAusId = Math.max(...ausencias.map(a => a.id));
+            localStorage.setItem('lastSeenAusId', lastSeenAusId);
+            document.getElementById('aus-notif').style.display = 'none';
+        }
+    }
+
+    // --- ACCIONES ---
     function stringToColor(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
@@ -240,21 +291,33 @@
         return color;
     }
 
+    function exec(action, data) { const url = location.href.includes('macros') ? location.href : SCRIPT_URL; return fetch(url, { method: 'POST', body: JSON.stringify({action, data}) }); }
+
+    function sendMsg() {
+        const txt = document.getElementById('m-texto').value; if(!txt) return;
+        const btn = document.getElementById('btn-send-msg'); btn.disabled = true; btn.innerText = "ENVIANDO...";
+        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), isSending: true };
+        mensajes.unshift(m); document.getElementById('m-texto').value = ''; render();
+        exec('addMsg', m).then(() => { btn.disabled = false; btn.innerText = "ENVIAR AHORA"; fetchData(); });
+    }
+
     function openEditAus(id) {
         const a = ausencias.find(x => x.id == id);
         document.getElementById('ea-id').value = id;
         document.getElementById('ea-nom').value = a.nombre;
         document.getElementById('ea-ape').value = a.apellido;
         document.getElementById('ea-area').value = a.area;
-        document.getElementById('ea-nota').value = a.nota || a.note;
+        document.getElementById('ea-nota').value = a.nota;
         if(a.fechaAusencia && a.fechaAusencia.includes('-')) document.getElementById('ea-fec').value = a.fechaAusencia;
         showModal('modal-edit-aus', true);
     }
 
     function saveEditAusencia() {
-        const d = { id: document.getElementById('ea-id').value, nombre: document.getElementById('ea-nom').value, apellido: document.getElementById('ea-ape').value, area: document.getElementById('ea-area').value, fechaAusencia: document.getElementById('ea-fec').value, nota: document.getElementById('ea-nota').value };
-        showGlobalLoader(true, "Actualizando...");
-        exec('editAusencia', d).then(() => { showModal('modal-edit-aus', false); fetchData().then(() => showGlobalLoader(false)); });
+        const id = document.getElementById('ea-id').value;
+        const a = ausencias.find(x => x.id == id); a.isSaving = true;
+        const d = { id, nombre: document.getElementById('ea-nom').value, apellido: document.getElementById('ea-ape').value, area: document.getElementById('ea-area').value, fechaAusencia: document.getElementById('ea-fec').value, nota: document.getElementById('ea-nota').value };
+        Object.assign(a, d); render(); showModal('modal-edit-aus', false);
+        exec('editAusencia', d).then(() => fetchData());
     }
 
     function addAusencia() {
@@ -265,46 +328,41 @@
         exec('addAusencia', a).then(() => { showModal('modal-ausencia', false); fetchData().then(() => showGlobalLoader(false)); });
     }
 
-    function renderQuickAccess() {
-        const container = document.getElementById('quick-access-container');
-        if (usuarios.length === 0) return container.innerHTML = '';
-        let html = '<p style="color:white; font-size:0.7rem; font-weight:800; margin: 20px 0 10px;">ACCESO RÁPIDO</p><div class="quick-grid">';
-        usuarios.forEach(u => {
-            html += `<div class="quick-item" onclick="accesoDirecto(${u.id})"><b>${u.nombre}</b><span>${u.area}</span><button class="btn-del-user" onclick="borrarUser(event, ${u.id})">&times;</button></div>`;
-        });
-        container.innerHTML = html + '</div>';
-    }
-
     function intentarLogin() {
         const n = document.getElementById('log-nombre').value, ap = document.getElementById('log-apellido').value, a = document.getElementById('log-area').value, p = document.getElementById('log-pass').value;
         if(!n || !p) return alert("Faltan datos");
         if(p !== CLAVE_FIJA) return alert("Clave errónea");
         const u = { id: Date.now(), nombre: n, apellido: ap, area: a };
         showGlobalLoader(true, "Creando perfil...");
-        exec('addUsuario', u).then(() => { user = u; localStorage.setItem('hub_user_v20', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); showGlobalLoader(false); });
+        exec('addUsuario', u).then(() => { user = u; localStorage.setItem('hub_user_v23', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); showGlobalLoader(false); });
     }
 
-    function accesoDirecto(id) { const u = usuarios.find(x => x.id == id); if(prompt(`Clave para ${u.nombre}:`) === CLAVE_FIJA) { user = u; localStorage.setItem('hub_user_v20', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); } }
+    function renderQuickAccess() {
+        const container = document.getElementById('quick-access-container');
+        if (!usuarios || usuarios.length === 0) return container.innerHTML = '';
+        let html = '<p style="color:white; font-size:0.7rem; font-weight:800; margin: 20px 0 10px;">ACCESO RÁPIDO</p><div class="quick-grid">';
+        usuarios.forEach(u => {
+            html += `<div class="quick-item" onclick="accesoDirecto(${u.id})"><b>${u.nombre}</b><span>${u.area}</span><button class="btn-del-user" onclick="borrarUser(event, ${u.id})">&times;</button></div>`;
+        });
+        container.innerHTML = html + '</div>';
+    }
+    function accesoDirecto(id) { const u = usuarios.find(x => x.id == id); if(prompt(`Clave para ${u.nombre}:`) === CLAVE_FIJA) { user = u; localStorage.setItem('hub_user_v23', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); } }
     function borrarUser(e, id) { e.stopPropagation(); if(confirm("¿Borrar acceso?")) exec('deleteUsuario', {id}).then(() => fetchData()); }
-    function logout() { localStorage.removeItem('hub_user_v20'); location.reload(); }
+    function logout() { localStorage.removeItem('hub_user_v23'); location.reload(); }
     function iniciarApp() { document.getElementById('user-display').innerText = user.nombre; fetchData(); setInterval(fetchData, 45000); }
     function showModal(id, s) { document.getElementById(id).style.display = s ? 'flex' : 'none'; }
-    function exec(action, data) { const url = location.href.includes('macros') ? location.href : SCRIPT_URL; return fetch(url, { method: 'POST', body: JSON.stringify({action, data}) }); }
     function genCal(s, m, a) { const tot = new Date(a, m+1, 0).getDate(), off = (new Date(a, m, 1).getDay() || 7)-1; let h = ''; ['L', 'M', 'X', 'J', 'V', 'S', 'D'].forEach(l => h += `<div style="font-size:0.6rem; text-align:center; color:var(--gray); font-weight:800; padding-bottom:8px">${l}</div>`); for(let i=0; i<off; i++) h += `<div class="day" style="background:none; border:none"></div>`; for(let d=1; d<=tot; d++) { const f = `${a}-${m}-${d}`, act = s.asistencia.includes(f) ? 'active' : ''; h += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`; } return h; }
     function mark(sId, f, l) { if(l) return alert("Ficha Bloqueada"); const s = socios.find(x => x.id == sId); const ex = s.asistencia.includes(f); if(confirm(ex ? "¿Quitar día?" : "¿Marcar día?")) { if(ex) s.asistencia = s.asistencia.filter(x => x !== f); else s.asistencia.push(f); render(); exec('markDay', { id: sId, asistencia: s.asistencia }); } }
     function changeMonth(id, d) { let st = viewStates[id]; st.m += d; if(st.m>11){st.m=0;st.a++} else if(st.m<0){st.m=11;st.a--} render(); }
     function toggleLock(id, c) { if(confirm(c ? "¿Desbloquear?" : "¿Bloquear?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
+    function addSocio() { const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false }; if(!s.nombre) return; showGlobalLoader(true, "Guardando..."); exec('addSocio', s).then(() => { showModal('modal-socio', false); fetchData().then(() => showGlobalLoader(false)); }); }
     function abrirModalPrincipal() { if(currentTab === 'socios') showModal('modal-socio', true); if(currentTab === 'ausencias') showModal('modal-ausencia', true); }
-    function checkNotifs() { if(currentTab === 'mensajes') { updateLastSeen(); return; } const news = mensajes.filter(m => m.id > lastSeenMsgId && m.autor !== user.nombre).length; const b = document.getElementById('msg-notif'); if(news > 0) { b.innerText = news; b.style.display = 'flex'; } else b.style.display = 'none'; }
-    function updateLastSeen() { if(mensajes.length > 0) { lastSeenMsgId = Math.max(...mensajes.map(m => m.id)); localStorage.setItem('lastSeenMsgId', lastSeenMsgId); document.getElementById('msg-notif').style.display = 'none'; } }
     function obtenerMesAnio(m, a) { return ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][m] + " " + a; }
     function formatDate(f) { if (!f) return "N/A"; let d = new Date(f); if (isNaN(d.getTime())) return f; return `${d.getUTCDate().toString().padStart(2, '0')}/${(d.getUTCMonth() + 1).toString().padStart(2, '0')}/${d.getUTCFullYear()}`; }
     function openEditMsg(id) { const m = mensajes.find(x => x.id == id); document.getElementById('edit-msg-text').value = m.texto; document.getElementById('edit-msg-id').value = id; showModal('modal-edit-msg', true); }
-    function saveEditMsg() { const id = document.getElementById('edit-msg-id').value, txt = document.getElementById('edit-msg-text').value; exec('editMsg', { id, texto: txt }).then(() => { showModal('modal-edit-msg', false); fetchData(); }); }
+    function saveEditMsg() { const id = document.getElementById('edit-msg-id').value, txt = document.getElementById('edit-msg-text').value; const m = mensajes.find(x => x.id == id); m.isSending = true; render(); showModal('modal-edit-msg', false); exec('editMsg', { id, texto: txt }).then(() => fetchData()); }
     function del(id, t) { if(confirm('¿Eliminar registro?')) { showGlobalLoader(true, "Borrando..."); exec('delete', {id, tipo: t}).then(() => fetchData().then(() => showGlobalLoader(false))); } }
-    function sendMsg() { const t = document.getElementById('m-texto').value; if(!t) return; const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: t, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() }; mensajes.unshift(m); document.getElementById('m-texto').value = ''; render(); exec('addMsg', m).then(() => fetchData()); }
-    function addSocio() { const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false }; if(!s.nombre) return; showGlobalLoader(true, "Guardando..."); exec('addSocio', s).then(() => { showModal('modal-socio', false); fetchData().then(() => showGlobalLoader(false)); }); }
-    function switchTab(t) { currentTab = t; document.getElementById('view-title-main').innerText = t.toUpperCase(); document.getElementById('msg-input-bar').style.display = t === 'mensajes' ? 'flex' : 'none'; document.getElementById('fab').style.display = t === 'mensajes' ? 'none' : 'flex'; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); render(); if(t==='mensajes') updateLastSeen(); }
+    function switchTab(t) { currentTab = t; document.getElementById('view-title-main').innerText = t.toUpperCase(); document.getElementById('msg-input-bar').style.display = t === 'mensajes' ? 'flex' : 'none'; document.getElementById('fab').style.display = t === 'mensajes' ? 'none' : 'flex'; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); render(); if(t !== 'socios') updateLastSeen(t === 'mensajes' ? 'msg' : 'aus'); }
 </script>
 </body>
 </html>
