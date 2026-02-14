@@ -1,173 +1,263 @@
 <!DOCTYPE html>
-<html>
+<html lang="es" class="light">
 <head>
     <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>Portal de Comunicación</title>
+    
+    <!-- Frameworks y Fuentes -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "wa-green": "#00a884",
+                        "wa-teal": "#128c7e",
+                        "wa-chat-bg": "#efeae2",
+                        "gm-blue": "#1a73e8",
+                        "gm-red": "#d93025",
+                        "primary": "#128c7e",
+                        "accent": "#00a884",
+                        "background-light": "#f6f8fc",
+                    },
+                    fontFamily: { "sans": ["Inter", "Roboto", "sans-serif"] }
+                },
+            },
+        }
+    </script>
+
     <style>
-        :root { --primary: #0f172a; --accent: #10b981; --danger: #ef4444; --warning: #f59e0b; --bg: #f8fafc; --text: #1e293b; --gray: #64748b; }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        :root { --primary: #128c7e; --accent: #00a884; --danger: #d93025; --bg: #f6f8fc; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
+        
+        .chat-container { 
+            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); 
+            background-repeat: repeat; 
+            background-attachment: fixed; 
+        }
+        .bubble-me { position: relative; background: #dcf8c6; border-radius: 8px 0 8px 8px; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); }
+        .bubble-me::after { content: ''; position: absolute; top: 0; right: -8px; width: 0; height: 0; border: 10px solid transparent; border-left-color: #dcf8c6; border-top: 0; }
+        .bubble-other { position: relative; background: #ffffff; border-radius: 0 8px 8px 8px; box-shadow: 0 1px 0.5px rgba(0,0,0,0.13); }
+        .bubble-other::after { content: ''; position: absolute; top: 0; left: -8px; width: 0; height: 0; border: 10px solid transparent; border-right-color: #ffffff; border-top: 0; }
 
-        /* --- LOADERS --- */
-        #global-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .spinner { width: 45px; height: 45px; border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .gm-card { transition: all 0.2s; border: 1px solid #e0e0e0; background: white; }
+        .gm-card:hover { box-shadow: 0 1px 3px 0 rgba(60,64,67,.30), 0 4px 8px 3px rgba(60,64,67,.15); }
+        
+        #global-loader { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--gm-blue); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+        .day.active { background: var(--accent) !important; color: white; font-weight: bold; }
         
-        .loading-card { opacity: 0.6; filter: grayscale(0.7); animation: pulseLoad 1.5s infinite; pointer-events: none; }
-        @keyframes pulseLoad { 0%, 100% { opacity: 0.6; } 50% { opacity: 0.3; } }
-
-        /* --- LOGIN --- */
-        #login-screen { position: fixed; inset: 0; background: var(--primary); z-index: 5000; overflow-y: auto; padding: 25px; display: flex; flex-direction: column; align-items: center; }
-        .login-card { background: white; padding: 35px 25px; border-radius: 30px; width: 100%; max-width: 380px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 380px; margin-bottom: 40px; }
-        .quick-item { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); padding: 15px; border-radius: 20px; color: white; position: relative; }
-        .btn-del-user { position: absolute; top: 5px; right: 5px; color: var(--danger); background: none; border: none; font-size: 1.2rem; font-weight: 800; }
-
-        /* --- UI --- */
-        header { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 100; }
-        header h1 { font-size: 1rem; font-weight: 800; color: var(--primary); }
-        #main-feed { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 250px; scroll-behavior: smooth; }
-        .card { background: white; border-radius: 22px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); position: relative; animation: cardIn 0.4s ease-out; }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* Círculo de notificación más llamativo */
+        .notif { 
+            position: absolute; 
+            top: -5px; 
+            right: -5px; 
+            background: #ff0000; 
+            color: white; 
+            font-size: 0.7rem; 
+            min-width: 20px; 
+            height: 20px; 
+            border-radius: 50%; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            border: 2px solid white; 
+            font-weight: 900; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
         
-        .ausencia-card { border-left: 5px solid var(--warning); }
-        .note-box { background: #fffbeb; border: 1px solid #fef3c7; padding: 12px; border-radius: 12px; margin-top: 10px; font-size: 0.85rem; color: #92400e; font-style: italic; white-space: pre-wrap; }
-
-        .msg-mine { background: #f0fdf4; border-left: 5px solid var(--accent); }
-        .author-badge { font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 8px; color: white; display: inline-block; margin-bottom: 8px; text-transform: uppercase; }
-        .msg-content { font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; margin-top: 5px; }
-
-        /* --- BOTTOM NAV & BADGES --- */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: white; border-top: 1px solid #e2e8f0; display: flex; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--gray); font-size: 0.65rem; font-weight: 800; position: relative; }
-        .nav-item.active { color: var(--primary); border-top: 4px solid var(--primary); }
-        
-        /* Notificaciones Rojas */
-        .notif { position: absolute; top: 12px; right: 26%; background: var(--danger); color: white; font-size: 0.65rem; min-width: 18px; height: 18px; border-radius: 10px; display: none; align-items: center; justify-content: center; border: 2.5px solid white; font-weight: 900; }
-
-        .btn-p { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 16px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.3s; }
-        .btn-act { border: none; background: none; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-        .fab { position: fixed; bottom: 90px; right: 20px; background: var(--primary); color: white; width: 64px; height: 64px; border-radius: 32px; border: none; font-size: 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 100; display: flex; align-items: center; justify-content: center; }
-
-        .cal-nav { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px; border-radius: 12px; margin: 10px 0; font-weight: 800; font-size: 0.85rem; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; border-radius: 10px; background: white; border: 1px solid #e2e8f0; font-weight: 700; }
-        .day.active { background: var(--accent) !important; color: white; border: none; }
-
-        input, select, textarea { width: 100%; padding: 14px; border: 2px solid #f1f5f9; background: #f8fafc; border-radius: 15px; font-size: 16px; outline: none; margin-bottom: 12px; resize: none; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); backdrop-filter: blur(10px); display: none; align-items: flex-end; z-index: 2000; }
-        .modal-body { background: white; width: 100%; border-radius: 35px 35px 0 0; padding: 30px; animation: slideUp 0.4s cubic-bezier(0.17, 0.84, 0.44, 1); max-height: 90vh; overflow-y: auto; }
+        .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
     </style>
 </head>
-<body>
+<body class="text-slate-800 min-h-screen flex flex-col">
 
 <div id="global-loader">
     <div class="spinner"></div>
-    <p id="loader-text" style="font-weight:700; color:var(--primary);">Sincronizando...</p>
+    <p id="loader-text" class="mt-4 font-medium text-gm-blue">Cargando...</p>
 </div>
 
 <!-- LOGIN -->
-<div id="login-screen">
-    <div id="quick-access-container" style="width:100%; max-width:380px;"></div>
-    <div class="login-card">
-        <h2 style="margin-bottom:20px; font-weight:800;">PORTAL DE COMUNICACION</h2>
-        <input type="text" id="log-nombre" placeholder="Nombre">
-        <input type="text" id="log-apellido" placeholder="Apellido">
-        <input type="text" id="log-area" placeholder="Área">
-        <input type="password" id="log-pass" placeholder="Contraseña">
-        <button class="btn-p" id="btn-login-main" onclick="intentarLogin()">ACCEDER</button>
+<div id="login-screen" class="fixed inset-0 bg-white z-[5000] flex flex-col items-center justify-center p-6 overflow-y-auto">
+    <div class="w-full max-w-[360px] text-center">
+        <div class="flex justify-center mb-6">
+            <div class="w-16 h-16 bg-gm-blue rounded-2xl flex items-center justify-center shadow-lg">
+                <span class="material-symbols-outlined text-white text-4xl">account_circle</span>
+            </div>
+        </div>
+        <h2 class="text-2xl font-semibold mb-2 text-slate-900">Portal Acceso</h2>
+        <div id="quick-access-container" class="mb-6 w-full text-left"></div>
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+            <input type="text" id="log-nombre" placeholder="Nombre" class="w-full p-3 text-sm rounded-xl border border-slate-200 outline-none">
+            <input type="text" id="log-apellido" placeholder="Apellido" class="w-full p-3 text-sm rounded-xl border border-slate-200 outline-none">
+            <input type="text" id="log-area" placeholder="Área" class="w-full p-3 text-sm rounded-xl border border-slate-200 outline-none">
+            <input type="password" id="log-pass" placeholder="Contraseña" class="w-full p-3 text-sm rounded-xl border border-slate-200 outline-none">
+            <button class="w-full bg-gm-blue text-white p-3.5 rounded-xl font-medium" onclick="intentarLogin()">Acceder</button>
+        </div>
     </div>
 </div>
 
-<header>
-    <h1 id="view-title-main">CENTRO DE NUEVO INGRESO</h1>
-    <div style="text-align: right;">
-        <b id="user-display" style="font-size:0.75rem;">-</b><br>
-        <span onclick="logout()" style="color:var(--danger); font-size: 0.6rem; font-weight: 800; text-transform: uppercase;">Cerrar Sesión</span>
+<!-- HEADER -->
+<header class="sticky top-0 z-20 bg-wa-teal text-white shadow-md">
+    <div class="flex items-center justify-between px-4 h-16">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><span class="material-symbols-outlined">hub</span></div>
+            <div class="flex flex-col">
+                <h1 id="view-title-main" class="text-lg font-medium leading-none tracking-tight">PORTAL</h1>
+                <span id="user-display" class="text-[10px] opacity-80 mt-1 uppercase font-black">-</span>
+            </div>
+        </div>
+        <button onclick="logout()" class="p-2 hover:bg-white/10 rounded-full"><span class="material-symbols-outlined">logout</span></button>
     </div>
 </header>
 
-<div id="main-feed"></div>
+<main id="main-feed" class="flex-1 overflow-y-auto px-4 py-4 space-y-4"></main>
 
-<div id="msg-input-bar" class="modal" style="background:none; height:auto; top:auto; bottom:75px; align-items:flex-end; display:none">
-    <div class="modal-body" style="padding: 15px; border-radius: 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1);">
-        <textarea id="m-texto" placeholder="Escribe un mensaje..."></textarea>
-        <button class="btn-p" id="btn-send-msg" onclick="sendMsg()">ENVIAR AHORA</button>
+<!-- BARRA CHAT -->
+<div id="msg-input-bar" class="hidden sticky bottom-[75px] bg-wa-chat-bg p-2 safe-area-bottom">
+    <div class="flex items-end gap-2 max-w-4xl mx-auto">
+        <div class="flex-1 bg-white rounded-2xl px-4 py-2 flex items-center shadow-sm">
+            <textarea id="m-texto" class="w-full bg-transparent border-none focus:ring-0 text-[15px] py-1 resize-none" placeholder="Mensaje..." rows="1"></textarea>
+        </div>
+        <button id="btn-send-msg" onclick="sendMsg()" class="bg-wa-teal text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center">
+            <span class="material-symbols-outlined">send</span>
+        </button>
     </div>
 </div>
 
-<button id="fab" class="fab" onclick="abrirModalPrincipal()">+</button>
+<button id="fab" class="fixed bottom-24 right-6 bg-white text-gm-blue w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center z-30 border border-slate-100" onclick="abrirModalPrincipal()">
+    <span class="material-symbols-outlined text-3xl">add</span>
+</button>
 
-<nav class="bottom-nav">
-    <button class="nav-item active" id="tab-socios" onclick="switchTab('socios')">SOCIOS</button>
-    <button class="nav-item" id="tab-ausencias" onclick="switchTab('ausencias')">
-        AUSENCIAS <div id="aus-notif" class="notif">0</div>
+<!-- NAV CON NOTIFICACIÓN -->
+<nav class="fixed bottom-0 left-0 right-0 h-[75px] bg-white border-t border-slate-200 flex justify-around items-center safe-area-bottom z-40">
+    <button id="tab-socios" onclick="switchTab('socios')" class="flex flex-col items-center gap-1 text-wa-teal transition-all flex-1">
+        <div class="px-5 py-1 rounded-full bg-wa-teal/10 relative">
+            <span class="material-symbols-outlined font-bold">group</span>
+        </div>
+        <span class="text-[10px] font-bold uppercase">Socios</span>
     </button>
-    <button class="nav-item" id="tab-mensajes" onclick="switchTab('mensajes')">
-        MENSAJES <div id="msg-notif" class="notif">0</div>
+    <button id="tab-ausencias" onclick="switchTab('ausencias')" class="flex flex-col items-center gap-1 text-slate-500 transition-all flex-1 relative">
+        <div class="px-5 py-1 rounded-full relative">
+            <span class="material-symbols-outlined">event_busy</span>
+            <div id="aus-notif" class="notif">0</div>
+        </div>
+        <span class="text-[10px] font-bold uppercase">Ausencias</span>
+    </button>
+    <button id="tab-mensajes" onclick="switchTab('mensajes')" class="flex flex-col items-center gap-1 text-slate-500 transition-all flex-1 relative">
+        <div class="px-5 py-1 rounded-full relative">
+            <span class="material-symbols-outlined">chat</span>
+            <div id="msg-notif" class="notif">0</div>
+        </div>
+        <span class="text-[10px] font-bold uppercase">Chat</span>
     </button>
 </nav>
 
-<!-- MODALES -->
-<div id="modal-socio" class="modal" onclick="if(event.target==this) showModal('modal-socio', false)">
-    <div class="modal-body">
-        <h2 style="margin-bottom:20px; font-weight: 800;">Nuevo Socio</h2>
-        <input type="text" id="s-nom" placeholder="Nombre">
-        <input type="text" id="s-ape" placeholder="Apellido">
-        <input type="text" id="s-area" placeholder="Área">
-        <input type="date" id="s-fec">
-        <select id="s-con"><option value="Planta">Contrato: Planta</option><option value="Part-time">Contrato: Part-time</option></select>
-        <button class="btn-p" onclick="addSocio()">GUARDAR</button>
+<!-- MODALES (SOCIO, AUSENCIA, EDIT) -->
+<div id="modal-socio" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[3000] p-4" onclick="if(event.target==this) showModal('modal-socio', false)">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-slide-up">
+        <h2 class="text-xl font-bold mb-6 text-slate-700 uppercase">Nuevo Socio</h2>
+        <div class="space-y-4">
+            <input type="text" id="s-nom" placeholder="Nombre" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="s-ape" placeholder="Apellido" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="s-area" placeholder="Área" class="w-full p-3 border rounded-xl outline-none">
+            <input type="date" id="s-fec" class="w-full p-3 border rounded-xl outline-none">
+            <select id="s-con" class="w-full p-3 border rounded-xl outline-none"><option value="Planta">Planta</option><option value="Part-time">Part-time</option></select>
+            <button class="w-full bg-wa-teal text-white p-4 rounded-xl font-bold" onclick="addSocio()">Guardar</button>
+        </div>
     </div>
 </div>
 
-<div id="modal-ausencia" class="modal" onclick="if(event.target==this) showModal('modal-ausencia', false)">
-    <div class="modal-body">
-        <h2 style="margin-bottom:20px; font-weight: 800;">Reportar Ausencia</h2>
-        <input type="text" id="a-nom" placeholder="Nombre">
-        <input type="text" id="a-ape" placeholder="Apellido">
-        <input type="text" id="a-area" placeholder="Área">
-        <input type="date" id="a-fec">
-        <textarea id="a-nota" placeholder="Motivo/Nota..." style="height:120px"></textarea>
-        <button class="btn-p" onclick="addAusencia()">REGISTRAR</button>
+<div id="modal-ausencia" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-[3000] p-4" onclick="if(event.target==this) showModal('modal-ausencia', false)">
+    <div class="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl animate-slide-up">
+        <h2 class="text-xl font-bold mb-6 text-gm-red uppercase">Reportar Ausencia</h2>
+        <div class="space-y-4">
+            <input type="text" id="a-nom" placeholder="Nombre" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="a-ape" placeholder="Apellido" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="a-area" placeholder="Área" class="w-full p-3 border rounded-xl outline-none">
+            <input type="date" id="a-fec" class="w-full p-3 border rounded-xl outline-none">
+            <textarea id="a-nota" placeholder="Nota..." class="w-full p-3 border rounded-xl h-24 outline-none resize-none"></textarea>
+            <button class="w-full bg-gm-red text-white p-4 rounded-xl font-bold" onclick="addAusencia()">Registrar</button>
+        </div>
     </div>
 </div>
 
-<div id="modal-edit-msg" class="modal" onclick="if(event.target==this) showModal('modal-edit-msg', false)">
-    <div class="modal-body">
-        <h2 style="margin-bottom:20px; font-weight: 800;">Editar Mensaje</h2>
-        <textarea id="edit-msg-text" style="height:200px;"></textarea>
+<div id="modal-edit-msg" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[4000] p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl">
+        <h2 class="font-bold mb-4">Editar Mensaje</h2>
+        <textarea id="edit-msg-text" class="w-full p-4 bg-slate-50 rounded-xl h-32 border outline-none"></textarea>
         <input type="hidden" id="edit-msg-id">
-        <button class="btn-p" id="btn-save-msg-edit" onclick="saveEditMsg()">GUARDAR CAMBIOS</button>
+        <div class="flex gap-3 mt-6">
+            <button class="flex-1 p-3 text-slate-500 font-bold" onclick="showModal('modal-edit-msg', false)">CANCELAR</button>
+            <button class="flex-1 bg-wa-teal text-white p-3 rounded-xl font-bold" onclick="saveEditMsg()">GUARDAR</button>
+        </div>
     </div>
 </div>
 
-<div id="modal-edit-aus" class="modal" onclick="if(event.target==this) showModal('modal-edit-aus', false)">
-    <div class="modal-body">
-        <h2 style="margin-bottom:20px; font-weight: 800;">Editar Ausencia</h2>
-        <input type="text" id="ea-nom" placeholder="Nombre">
-        <input type="text" id="ea-ape" placeholder="Apellido">
-        <input type="text" id="ea-area" placeholder="Área">
-        <input type="date" id="ea-fec">
-        <textarea id="ea-nota" placeholder="Nota..." style="height:120px"></textarea>
-        <input type="hidden" id="ea-id">
-        <button class="btn-p" id="btn-save-aus-edit" onclick="saveEditAusencia()">ACTUALIZAR TODO</button>
+<div id="modal-edit-aus" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-[4000] p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <h2 class="font-bold mb-4 uppercase text-slate-700">Editar Ausencia</h2>
+        <div class="space-y-3">
+            <input type="text" id="ea-nom" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="ea-ape" class="w-full p-3 border rounded-xl outline-none">
+            <input type="text" id="ea-area" class="w-full p-3 border rounded-xl outline-none">
+            <input type="date" id="ea-fec" class="w-full p-3 border rounded-xl outline-none">
+            <textarea id="ea-nota" class="w-full p-3 border rounded-xl h-24 outline-none"></textarea>
+            <input type="hidden" id="ea-id">
+            <button class="w-full bg-gm-blue text-white p-4 rounded-xl font-bold" onclick="saveEditAusencia()">ACTUALIZAR</button>
+        </div>
     </div>
 </div>
 
 <script>
+    // --- LÓGICA CORE ---
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmRjHHtshCpd3jgqCb9mmBIVF28jZ513Gueikhr02kuwmLS0MMMYLCBnvc60hguLsYHw/exec'; 
     const CLAVE_FIJA = '1234'; 
 
     let user = null, currentTab = 'socios', socios = [], mensajes = [], usuarios = [], ausencias = [], viewStates = {};
-    let lastSeenMsgId = localStorage.getItem('lastSeenMsgId') || 0;
-    let lastSeenAusId = localStorage.getItem('lastSeenAusId') || 0;
+    
+    // IMPORTANTE: IDs numéricos para comparar correctamente
+    let lastSeenMsgId = Number(localStorage.getItem('lastSeenMsgId')) || 0;
+    let lastSeenAusId = Number(localStorage.getItem('lastSeenAusId')) || 0;
+
+    // --- SEGURIDAD 5 MIN ---
+    let inactivityTimer;
+    const SEC_TIMEOUT = 5 * 60 * 1000;
+
+    function resetSecurityTimer() {
+        if (!user) return;
+        clearTimeout(inactivityTimer);
+        localStorage.setItem('hub_last_act', Date.now());
+        inactivityTimer = setTimeout(() => { logout(); }, SEC_TIMEOUT);
+    }
+
+    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(ev => window.addEventListener(ev, resetSecurityTimer));
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            const last = Number(localStorage.getItem('hub_last_act'));
+            if (last && (Date.now() - last > SEC_TIMEOUT)) logout();
+        } else {
+            localStorage.setItem('hub_last_act', Date.now());
+        }
+    });
 
     window.onload = () => {
-        showGlobalLoader(true, "Conectando...");
+        showGlobalLoader(true, "Iniciando...");
         fetchData().then(() => {
             showGlobalLoader(false);
             const saved = localStorage.getItem('hub_user_v23');
@@ -186,183 +276,190 @@
         try {
             const r = await fetch(url + '?action=getDatos');
             const d = await r.json();
-            socios = d.socios || []; mensajes = d.msgs || []; usuarios = d.usuarios || []; ausencias = d.ausencias || [];
-            checkNotifs(); render(); renderQuickAccess();
+            socios = d.socios || []; 
+            mensajes = d.msgs || []; 
+            usuarios = d.usuarios || []; 
+            ausencias = d.ausencias || [];
+            checkNotifs(); 
+            render(); 
+            renderQuickAccess();
         } catch(e) { console.error("Sync error:", e); }
     }
 
-    function render() {
-        const feed = document.getElementById('main-feed'); feed.innerHTML = '';
-        if(currentTab === 'socios') {
-            socios.forEach(s => {
-                if(!viewStates[s.id]) viewStates[s.id] = { m: new Date().getMonth(), a: new Date().getFullYear() };
-                const st = viewStates[s.id];
-                const card = document.createElement('div'); card.className = `card ${s.bloqueado ? 'locked' : ''}`;
-                card.innerHTML = `
-                    <div class="card-header"><div style="font-weight:800">${s.nombre} ${s.apellido}</div><button onclick="toggleLock(${s.id}, ${s.bloqueado})" style="border:none; background:none; font-size:1.4rem">${s.bloqueado ? '🔒' : '🔓'}</button></div>
-                    <div style="font-size:0.7rem; color:var(--gray); font-weight:700">${s.area} • ${s.contrato}</div>
-                    <div style="font-size:0.7rem; color:var(--primary); font-weight:700; margin:10px 0">📅 Ingreso: ${formatDate(s.fecha)}</div>
-                    <div class="cal-nav"><button onclick="changeMonth(${s.id}, -1)"><</button><span>${obtenerMesAnio(st.m, st.a)}</span><button onclick="changeMonth(${s.id}, 1)">></button></div>
-                    <div class="cal-grid">${genCal(s, st.m, st.a)}</div>
-                    <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center"><span style="font-size:0.75rem; font-weight:800; color:var(--accent)">Días: ${s.asistencia.length}</span><button class="btn-act" style="color:var(--danger)" onclick="del(${s.id}, 'socio')">BORRAR</button></div>`;
-                feed.appendChild(card);
-            });
-        } 
-        else if(currentTab === 'ausencias') {
-            ausencias.forEach(a => {
-                const card = document.createElement('div'); 
-                const isSaving = a.isSaving ? 'loading-card' : '';
-                card.className = `card ausencia-card ${isSaving}`;
-                card.innerHTML = `
-                    <div class="card-header"><div style="font-weight:800">${a.nombre} ${a.apellido}</div><span style="font-size:0.6rem; color:var(--gray)">${a.fechaCreado}</span></div>
-                    <div style="font-size:0.75rem; color:var(--warning); font-weight:800">⚠️ Ausencia: ${formatDate(a.fechaAusencia)} (${a.area})</div>
-                    <div class="note-box">${a.nota || 'Sin nota'}</div>
-                    <div style="font-size:0.6rem; color:var(--gray); margin-top:10px">Registrador: <b>${a.registrador}</b></div>
-                    <div style="margin-top:15px; display:flex">
-                        <button class="btn-act" style="color:var(--primary); margin-right:15px" onclick="openEditAus(${a.id})">EDITAR</button>
-                        <button class="btn-act" style="color:var(--danger)" onclick="del(${a.id}, 'ausencia')">ELIMINAR</button>
-                    </div>`;
-                feed.appendChild(card);
-            });
-        }
-        else {
-            mensajes.forEach(m => {
-                const card = document.createElement('div'); 
-                const isMine = m.autor === user.nombre;
-                const isSending = m.isSending ? 'loading-card' : '';
-                card.className = `card ${isMine ? 'msg-mine' : ''} ${isSending}`;
-                card.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px">
-                        <span class="author-badge" style="background:${stringToColor(m.autor)}">${m.autor}</span>
-                        <span style="font-size:0.6rem; color:var(--gray)">${m.fecha} ${m.hora}</span>
-                    </div>
-                    <div class="msg-content">${m.texto}</div>
-                    <div style="margin-top:10px; display:flex">
-                        <button class="btn-act" style="color:var(--primary); margin-right:15px" onclick="openEditMsg(${m.id})">EDITAR</button>
-                        <button class="btn-act" style="color:var(--danger)" onclick="del(${m.id}, 'msg')">BORRAR</button>
-                    </div>`;
-                feed.appendChild(card);
-            });
-        }
-    }
-
-    // --- NOTIFICACIONES ---
+    // --- SISTEMA DE NOTIFICACIONES CORREGIDO ---
     function checkNotifs() {
-        // Mensajes
-        if(currentTab === 'mensajes') updateLastSeen('msg');
-        else {
-            const newMsgs = mensajes.filter(m => m.id > lastSeenMsgId && m.autor !== user.nombre).length;
-            const bMsg = document.getElementById('msg-notif');
-            bMsg.innerText = newMsgs;
-            bMsg.style.display = newMsgs > 0 ? 'flex' : 'none';
+        if (!user) return;
+
+        // NOTIF MENSAJES
+        if(currentTab === 'mensajes') {
+            updateLastSeen('msg');
+        } else {
+            // Contar mensajes donde el ID es mayor al visto y el autor no es el usuario actual
+            const nuevos = mensajes.filter(m => 
+                Number(m.id) > lastSeenMsgId && 
+                m.autor.trim().toLowerCase() !== user.nombre.trim().toLowerCase()
+            ).length;
+            
+            const badge = document.getElementById('msg-notif');
+            if(badge) {
+                badge.innerText = nuevos > 99 ? '+99' : nuevos;
+                badge.style.display = nuevos > 0 ? 'flex' : 'none';
+            }
         }
-        // Ausencias
-        if(currentTab === 'ausencias') updateLastSeen('aus');
-        else {
-            const newAus = ausencias.filter(a => a.id > lastSeenAusId && !a.registrador.includes(user.nombre)).length;
-            const bAus = document.getElementById('aus-notif');
-            bAus.innerText = newAus;
-            bAus.style.display = newAus > 0 ? 'flex' : 'none';
+
+        // NOTIF AUSENCIAS
+        if(currentTab === 'ausencias') {
+            updateLastSeen('aus');
+        } else {
+            const nuevasAus = ausencias.filter(a => 
+                Number(a.id) > lastSeenAusId && 
+                !a.registrador.toLowerCase().includes(user.nombre.toLowerCase())
+            ).length;
+            
+            const badgeAus = document.getElementById('aus-notif');
+            if(badgeAus) {
+                badgeAus.innerText = nuevasAus;
+                badgeAus.style.display = nuevasAus > 0 ? 'flex' : 'none';
+            }
         }
     }
 
     function updateLastSeen(type) {
         if(type === 'msg' && mensajes.length > 0) {
-            lastSeenMsgId = Math.max(...mensajes.map(m => m.id));
-            localStorage.setItem('lastSeenMsgId', lastSeenMsgId);
+            const maxId = Math.max(...mensajes.map(m => Number(m.id)));
+            if (maxId > lastSeenMsgId) {
+                lastSeenMsgId = maxId;
+                localStorage.setItem('lastSeenMsgId', lastSeenMsgId);
+            }
             document.getElementById('msg-notif').style.display = 'none';
         }
         if(type === 'aus' && ausencias.length > 0) {
-            lastSeenAusId = Math.max(...ausencias.map(a => a.id));
-            localStorage.setItem('lastSeenAusId', lastSeenAusId);
+            const maxId = Math.max(...ausencias.map(a => Number(a.id)));
+            if (maxId > lastSeenAusId) {
+                lastSeenAusId = maxId;
+                localStorage.setItem('lastSeenAusId', lastSeenAusId);
+            }
             document.getElementById('aus-notif').style.display = 'none';
         }
     }
 
-    // --- ACCIONES ---
-    function stringToColor(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
-        let color = '#';
-        for (let i = 0; i < 3; i++) {
-            let value = (hash >> (i * 8)) & 0xFF;
-            color += ('00' + value.toString(16)).substr(-2);
-        }
-        return color;
+    // --- FUNCIONES DE RENDERIZADO Y ACCIONES ---
+    function renderQuickAccess() {
+        const container = document.getElementById('quick-access-container');
+        if (!usuarios || usuarios.length === 0) return container.innerHTML = '';
+        let html = `<div class="relative group mb-4">
+            <button onclick="document.getElementById('qa-menu').classList.toggle('hidden')" class="w-full bg-slate-50 border p-3 rounded-xl flex justify-between items-center">
+                <span class="text-sm font-bold">Seleccionar cuenta...</span>
+                <span class="material-symbols-outlined">expand_more</span>
+            </button>
+            <div id="qa-menu" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-[6000] overflow-hidden">
+                <div class="max-h-48 overflow-y-auto custom-scroll">`;
+        usuarios.forEach(u => {
+            html += `<div class="flex items-center justify-between p-3 hover:bg-slate-50 border-b last:border-0 cursor-pointer" onclick="accesoDirecto(${u.id})">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gm-blue/10 text-gm-blue rounded-full flex items-center justify-center font-bold text-xs">${u.nombre[0]}</div>
+                    <div class="flex flex-col"><span class="text-sm font-bold">${u.nombre}</span><span class="text-[9px] text-slate-400 uppercase">${u.area}</span></div>
+                </div>
+                <button class="text-slate-300 hover:text-gm-red" onclick="borrarUser(event, ${u.id})"><span class="material-symbols-outlined text-lg">delete</span></button>
+            </div>`;
+        });
+        html += `</div></div></div>`;
+        container.innerHTML = html;
     }
 
+    function render() {
+        const feed = document.getElementById('main-feed'); feed.innerHTML = '';
+        const isChat = currentTab === 'mensajes';
+        if(isChat) feed.classList.add('chat-container'); else feed.classList.remove('chat-container');
+
+        if(currentTab === 'socios') {
+            socios.forEach(s => {
+                if(!viewStates[s.id]) viewStates[s.id] = { m: new Date().getMonth(), a: new Date().getFullYear() };
+                const st = viewStates[s.id];
+                const card = document.createElement('div'); card.className = `gm-card rounded-2xl p-5 animate-slide-up`;
+                card.innerHTML = `<div class="flex justify-between items-start mb-4"><div class="flex gap-3"><div class="w-12 h-12 bg-wa-teal/10 text-wa-teal rounded-full flex items-center justify-center font-bold text-lg">${s.nombre[0]}${s.apellido[0]}</div><div><div class="font-bold text-slate-900">${s.nombre} ${s.apellido}</div><div class="text-[11px] text-slate-500 font-bold uppercase">${s.area} • ${s.contrato}</div></div></div><button onclick="toggleLock(${s.id}, ${s.bloqueado})">${s.bloqueado ? '🔒' : '🔓'}</button></div><div class="bg-slate-50 border rounded-xl p-3 mb-4"><div class="flex justify-between items-center mb-3 font-bold text-[10px] text-slate-400 uppercase"><button onclick="changeMonth(${s.id}, -1)" class="w-7 h-7 bg-white border rounded">←</button><span>${obtenerMesAnio(st.m, st.a)}</span><button onclick="changeMonth(${s.id}, 1)" class="w-7 h-7 bg-white border rounded">→</button></div><div class="cal-grid">${genCal(s, st.m, st.a)}</div></div><div class="flex justify-between items-center"><div class="flex flex-col"><span class="text-[9px] text-slate-400 uppercase font-bold">Asistencias</span><span class="text-sm font-bold text-wa-teal">${s.asistencia.length} días</span></div><button class="text-[10px] font-bold text-gm-red bg-red-50 px-3 py-1.5 rounded-lg uppercase" onclick="del(${s.id}, 'socio')">Eliminar</button></div>`;
+                feed.appendChild(card);
+            });
+        } 
+        else if(currentTab === 'ausencias') {
+            ausencias.forEach(a => {
+                const card = document.createElement('div'); card.className = `gm-card rounded-2xl p-4 border-l-4 border-l-gm-red animate-slide-up`;
+                card.innerHTML = `<div class="flex justify-between mb-2"><div class="font-bold text-slate-800">${a.nombre} ${a.apellido}</div><span class="text-[10px] text-slate-400">${a.fechaCreado}</span></div><div class="flex items-center gap-2 text-gm-red font-bold text-[11px] mb-3"><span class="material-symbols-outlined text-sm">event_available</span><span>FALTA: ${formatDate(a.fechaAusencia)}</span><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[9px] uppercase font-black">${a.area}</span></div><div class="bg-slate-50 p-3 rounded-lg text-xs text-slate-600 border italic leading-relaxed">"${a.nota || 'Sin motivo'}"</div><div class="flex justify-between items-center mt-4"><span class="text-[10px] text-slate-400">Por: <b class="uppercase">${a.registrador}</b></span><div class="flex gap-4"><button class="text-[11px] font-bold text-gm-blue uppercase" onclick="openEditAus(${a.id})">Editar</button><button class="text-[11px] font-bold text-gm-red uppercase" onclick="del(${a.id}, 'ausencia')">Borrar</button></div></div>`;
+                feed.appendChild(card);
+            });
+        }
+        else if(currentTab === 'mensajes') {
+            mensajes.forEach(m => {
+                const isMine = m.autor === user.nombre; 
+                const card = document.createElement('div'); card.className = `flex flex-col w-full mb-3 ${isMine ? 'items-end' : 'items-start'}`;
+                if(isMine) {
+                    card.innerHTML = `<div class="bubble-me max-w-[85%] px-3 py-2"><p class="text-[14.5px] text-slate-800 leading-tight">${m.texto}</p><div class="flex items-center justify-end gap-1 mt-1"><span class="text-[9px] text-slate-500 font-bold">${m.hora}</span><span class="material-symbols-outlined text-[16px] text-blue-500">done_all</span></div></div><div class="flex gap-3 mt-1 px-1"><button onclick="openEditMsg(${m.id})" class="text-[9px] font-bold uppercase text-slate-400">Editar</button><button onclick="del(${m.id}, 'msg')" class="text-[9px] font-bold uppercase text-gm-red/40">Borrar</button></div>`;
+                } else {
+                    card.innerHTML = `<div class="bubble-other max-w-[85%] px-3 py-2"><div class="flex justify-between gap-4 mb-1 border-b pb-1"><span class="text-[11px] font-bold" style="color:${stringToColor(m.autor)}">${m.autor}</span><span class="text-[9px] text-slate-400 uppercase font-black">${m.area || ''}</span></div><p class="text-[14.5px] text-slate-800 leading-tight">${m.texto}</p><div class="flex justify-end mt-1"><span class="text-[9px] text-slate-400 font-bold">${m.hora}</span></div></div>`;
+                }
+                feed.appendChild(card);
+            });
+            if(isChat) setTimeout(() => feed.scrollTop = feed.scrollHeight, 100);
+        }
+    }
+
+    function stringToColor(str) { let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); } const colors = ['#075e54', '#128c7e', '#25d366', '#34b7f1', '#1a73e8', '#d93025']; return colors[Math.abs(hash) % colors.length]; }
     function exec(action, data) { const url = location.href.includes('macros') ? location.href : SCRIPT_URL; return fetch(url, { method: 'POST', body: JSON.stringify({action, data}) }); }
 
     function sendMsg() {
         const txt = document.getElementById('m-texto').value; if(!txt) return;
-        const btn = document.getElementById('btn-send-msg'); btn.disabled = true; btn.innerText = "ENVIANDO...";
-        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString(), isSending: true };
+        const m = { id: Date.now(), autor: user.nombre, area: user.area, texto: txt, fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), isSending: true };
         mensajes.unshift(m); document.getElementById('m-texto').value = ''; render();
-        exec('addMsg', m).then(() => { btn.disabled = false; btn.innerText = "ENVIAR AHORA"; fetchData(); });
+        exec('addMsg', m).then(() => fetchData());
     }
 
-    function openEditAus(id) {
-        const a = ausencias.find(x => x.id == id);
-        document.getElementById('ea-id').value = id;
-        document.getElementById('ea-nom').value = a.nombre;
-        document.getElementById('ea-ape').value = a.apellido;
-        document.getElementById('ea-area').value = a.area;
-        document.getElementById('ea-nota').value = a.nota;
-        if(a.fechaAusencia && a.fechaAusencia.includes('-')) document.getElementById('ea-fec').value = a.fechaAusencia;
-        showModal('modal-edit-aus', true);
-    }
-
-    function saveEditAusencia() {
-        const id = document.getElementById('ea-id').value;
-        const a = ausencias.find(x => x.id == id); a.isSaving = true;
-        const d = { id, nombre: document.getElementById('ea-nom').value, apellido: document.getElementById('ea-ape').value, area: document.getElementById('ea-area').value, fechaAusencia: document.getElementById('ea-fec').value, nota: document.getElementById('ea-nota').value };
-        Object.assign(a, d); render(); showModal('modal-edit-aus', false);
-        exec('editAusencia', d).then(() => fetchData());
-    }
-
-    function addAusencia() {
-        const nom = document.getElementById('a-nom').value, fec = document.getElementById('a-fec').value;
-        if(!nom || !fec) return alert("Faltan datos");
-        const a = { id: Date.now(), registrador: user.nombre, nombre: nom, apellido: document.getElementById('a-ape').value, area: document.getElementById('a-area').value, fechaAusencia: fec, nota: document.getElementById('a-nota').value, fechaCreado: new Date().toLocaleString() };
-        showGlobalLoader(true, "Guardando...");
-        exec('addAusencia', a).then(() => { showModal('modal-ausencia', false); fetchData().then(() => showGlobalLoader(false)); });
-    }
+    function openEditAus(id) { const a = ausencias.find(x => x.id == id); document.getElementById('ea-id').value = id; document.getElementById('ea-nom').value = a.nombre; document.getElementById('ea-ape').value = a.apellido; document.getElementById('ea-area').value = a.area; document.getElementById('ea-nota').value = a.nota; if(a.fechaAusencia && a.fechaAusencia.includes('-')) document.getElementById('ea-fec').value = a.fechaAusencia; showModal('modal-edit-aus', true); }
+    function saveEditAusencia() { const id = document.getElementById('ea-id').value, d = { id, nombre: document.getElementById('ea-nom').value, apellido: document.getElementById('ea-ape').value, area: document.getElementById('ea-area').value, fechaAusencia: document.getElementById('ea-fec').value, nota: document.getElementById('ea-nota').value }; showModal('modal-edit-aus', false); exec('editAusencia', d).then(() => fetchData()); }
+    function addAusencia() { const nom = document.getElementById('a-nom').value, fec = document.getElementById('a-fec').value; if(!nom || !fec) return alert("Faltan datos"); const a = { id: Date.now(), registrador: user.nombre, nombre: nom, apellido: document.getElementById('a-ape').value, area: document.getElementById('a-area').value, fechaAusencia: fec, nota: document.getElementById('a-nota').value, fechaCreado: new Date().toLocaleString() }; showGlobalLoader(true, "Guardando..."); exec('addAusencia', a).then(() => { showModal('modal-ausencia', false); fetchData().then(() => showGlobalLoader(false)); }); }
 
     function intentarLogin() {
-        const n = document.getElementById('log-nombre').value, ap = document.getElementById('log-apellido').value, a = document.getElementById('log-area').value, p = document.getElementById('log-pass').value;
-        if(!n || !p) return alert("Faltan datos");
-        if(p !== CLAVE_FIJA) return alert("Clave errónea");
-        const u = { id: Date.now(), nombre: n, apellido: ap, area: a };
-        showGlobalLoader(true, "Creando perfil...");
-        exec('addUsuario', u).then(() => { user = u; localStorage.setItem('hub_user_v23', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); showGlobalLoader(false); });
+        const n = document.getElementById('log-nombre').value, p = document.getElementById('log-pass').value; if(!n || !p) return alert("Faltan datos"); if(p !== CLAVE_FIJA) return alert("Clave incorrecta");
+        const u = { id: Date.now(), nombre: n, apellido: document.getElementById('log-apellido').value, area: document.getElementById('log-area').value };
+        showGlobalLoader(true, "Iniciando..."); exec('addUsuario', u).then(() => { user = u; localStorage.setItem('hub_user_v23', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); showGlobalLoader(false); });
     }
 
-    function renderQuickAccess() {
-        const container = document.getElementById('quick-access-container');
-        if (!usuarios || usuarios.length === 0) return container.innerHTML = '';
-        let html = '<p style="color:white; font-size:0.7rem; font-weight:800; margin: 20px 0 10px;">ACCESO RÁPIDO</p><div class="quick-grid">';
-        usuarios.forEach(u => {
-            html += `<div class="quick-item" onclick="accesoDirecto(${u.id})"><b>${u.nombre}</b><span>${u.area}</span><button class="btn-del-user" onclick="borrarUser(event, ${u.id})">&times;</button></div>`;
-        });
-        container.innerHTML = html + '</div>';
-    }
     function accesoDirecto(id) { const u = usuarios.find(x => x.id == id); if(prompt(`Clave para ${u.nombre}:`) === CLAVE_FIJA) { user = u; localStorage.setItem('hub_user_v23', JSON.stringify(u)); document.getElementById('login-screen').style.display = 'none'; iniciarApp(); } }
     function borrarUser(e, id) { e.stopPropagation(); if(confirm("¿Borrar acceso?")) exec('deleteUsuario', {id}).then(() => fetchData()); }
-    function logout() { localStorage.removeItem('hub_user_v23'); location.reload(); }
-    function iniciarApp() { document.getElementById('user-display').innerText = user.nombre; fetchData(); setInterval(fetchData, 45000); }
+    function logout() { clearTimeout(inactivityTimer); localStorage.removeItem('hub_user_v23'); location.reload(); }
+    
+    function iniciarApp() { 
+        document.getElementById('user-display').innerText = user.nombre.toUpperCase() + ' • ' + (user.area || 'PERSONAL').toUpperCase(); 
+        fetchData(); resetSecurityTimer(); setInterval(fetchData, 45000); 
+    }
+
     function showModal(id, s) { document.getElementById(id).style.display = s ? 'flex' : 'none'; }
-    function genCal(s, m, a) { const tot = new Date(a, m+1, 0).getDate(), off = (new Date(a, m, 1).getDay() || 7)-1; let h = ''; ['L', 'M', 'X', 'J', 'V', 'S', 'D'].forEach(l => h += `<div style="font-size:0.6rem; text-align:center; color:var(--gray); font-weight:800; padding-bottom:8px">${l}</div>`); for(let i=0; i<off; i++) h += `<div class="day" style="background:none; border:none"></div>`; for(let d=1; d<=tot; d++) { const f = `${a}-${m}-${d}`, act = s.asistencia.includes(f) ? 'active' : ''; h += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`; } return h; }
-    function mark(sId, f, l) { if(l) return alert("Ficha Bloqueada"); const s = socios.find(x => x.id == sId); const ex = s.asistencia.includes(f); if(confirm(ex ? "¿Quitar día?" : "¿Marcar día?")) { if(ex) s.asistencia = s.asistencia.filter(x => x !== f); else s.asistencia.push(f); render(); exec('markDay', { id: sId, asistencia: s.asistencia }); } }
+    function genCal(s, m, a) { const tot = new Date(a, m+1, 0).getDate(), off = (new Date(a, m, 1).getDay() || 7)-1; let h = ''; ['L', 'M', 'M', 'J', 'V', 'S', 'D'].forEach(l => h += `<div class="text-[9px] text-center text-slate-300 font-bold p-1">${l}</div>`); for(let i=0; i<off; i++) h += `<div></div>`; for(let d=1; d<=tot; d++) { const f = `${a}-${m}-${d}`, act = s.asistencia.includes(f) ? 'active' : ''; h += `<div class="day ${act}" onclick="mark(${s.id}, '${f}', ${s.bloqueado})">${d}</div>`; } return h; }
+    function mark(sId, f, l) { if(l) return alert("Ficha Bloqueada"); const s = socios.find(x => x.id == sId), ex = s.asistencia.includes(f); if(confirm(ex ? "¿Quitar asistencia?" : "¿Marcar asistencia?")) { if(ex) s.asistencia = s.asistencia.filter(x => x !== f); else s.asistencia.push(f); render(); exec('markDay', { id: sId, asistencia: s.asistencia }); } }
     function changeMonth(id, d) { let st = viewStates[id]; st.m += d; if(st.m>11){st.m=0;st.a++} else if(st.m<0){st.m=11;st.a--} render(); }
-    function toggleLock(id, c) { if(confirm(c ? "¿Desbloquear?" : "¿Bloquear?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
+    function toggleLock(id, c) { if(confirm(c ? "¿Desbloquear ficha?" : "¿Bloquear ficha?")) { const s = socios.find(x => x.id == id); s.bloqueado = !c; render(); exec('toggleLock', { id, bloqueado: s.bloqueado }); } }
     function addSocio() { const s = { id: Date.now(), nombre: document.getElementById('s-nom').value, apellido: document.getElementById('s-ape').value, area: document.getElementById('s-area').value, fecha: document.getElementById('s-fec').value, contrato: document.getElementById('s-con').value, asistencia: [], bloqueado: false }; if(!s.nombre) return; showGlobalLoader(true, "Guardando..."); exec('addSocio', s).then(() => { showModal('modal-socio', false); fetchData().then(() => showGlobalLoader(false)); }); }
     function abrirModalPrincipal() { if(currentTab === 'socios') showModal('modal-socio', true); if(currentTab === 'ausencias') showModal('modal-ausencia', true); }
-    function obtenerMesAnio(m, a) { return ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][m] + " " + a; }
+    function obtenerMesAnio(m, a) { return ["ENERO","FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE","NOVIEMBRE","DICIEMBRE"][m] + " " + a; }
     function formatDate(f) { if (!f) return "N/A"; let d = new Date(f); if (isNaN(d.getTime())) return f; return `${d.getUTCDate().toString().padStart(2, '0')}/${(d.getUTCMonth() + 1).toString().padStart(2, '0')}/${d.getUTCFullYear()}`; }
     function openEditMsg(id) { const m = mensajes.find(x => x.id == id); document.getElementById('edit-msg-text').value = m.texto; document.getElementById('edit-msg-id').value = id; showModal('modal-edit-msg', true); }
-    function saveEditMsg() { const id = document.getElementById('edit-msg-id').value, txt = document.getElementById('edit-msg-text').value; const m = mensajes.find(x => x.id == id); m.isSending = true; render(); showModal('modal-edit-msg', false); exec('editMsg', { id, texto: txt }).then(() => fetchData()); }
+    function saveEditMsg() { const id = document.getElementById('edit-msg-id').value, txt = document.getElementById('edit-msg-text').value; showModal('modal-edit-msg', false); exec('editMsg', { id, texto: txt }).then(() => fetchData()); }
     function del(id, t) { if(confirm('¿Eliminar registro?')) { showGlobalLoader(true, "Borrando..."); exec('delete', {id, tipo: t}).then(() => fetchData().then(() => showGlobalLoader(false))); } }
-    function switchTab(t) { currentTab = t; document.getElementById('view-title-main').innerText = t.toUpperCase(); document.getElementById('msg-input-bar').style.display = t === 'mensajes' ? 'flex' : 'none'; document.getElementById('fab').style.display = t === 'mensajes' ? 'none' : 'flex'; document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); render(); if(t !== 'socios') updateLastSeen(t === 'mensajes' ? 'msg' : 'aus'); }
+    
+    function switchTab(t) { 
+        currentTab = t; 
+        document.getElementById('view-title-main').innerText = t === 'mensajes' ? 'CHAT GRUPAL' : t.toUpperCase(); 
+        document.getElementById('msg-input-bar').style.display = t === 'mensajes' ? 'block' : 'none'; 
+        document.getElementById('fab').style.display = t === 'mensajes' ? 'none' : 'flex'; 
+        document.querySelectorAll('nav button').forEach(b => { 
+            b.classList.remove('text-wa-teal'); b.classList.add('text-slate-500'); 
+            b.querySelector('div').classList.remove('bg-wa-teal/10'); 
+        }); 
+        const activeTab = document.getElementById('tab-'+t); 
+        activeTab.classList.add('text-wa-teal'); activeTab.classList.remove('text-slate-500'); 
+        activeTab.querySelector('div').classList.add('bg-wa-teal/10'); 
+        render(); 
+        if(t !== 'socios') updateLastSeen(t === 'mensajes' ? 'msg' : 'aus'); 
+    }
 </script>
 </body>
 </html>
